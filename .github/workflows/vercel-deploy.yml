@@ -1,0 +1,34 @@
+# Automatic Vercel deploys: connect this repo at https://vercel.com/new — each push
+# to main (and PR previews) builds without this workflow.
+#
+# This file is optional: run manually from Actions → "Deploy to Vercel (CLI)" if you
+# prefer CLI deploys with these secrets:
+#   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#
+# Set VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (and optional VITE_ADMIN_ROUTE) in
+# Vercel → Project → Settings → Environment Variables.
+
+name: Deploy to Vercel (CLI)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--prod"
