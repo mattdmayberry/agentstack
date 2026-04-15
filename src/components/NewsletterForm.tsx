@@ -8,23 +8,36 @@ type NewsletterFormProps = {
 
 export function NewsletterForm({ compact = false, buttonLabel }: NewsletterFormProps) {
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (status === 'submitting') return
     setStatus('idle')
 
-    if (!supabase) {
-      setStatus('success')
-      setEmail('')
+    const normalized = email.trim().toLowerCase()
+    if (!normalized) {
+      setStatus('error')
       return
     }
 
+    if (!supabase) {
+      setStatus('error')
+      return
+    }
+
+    setStatus('submitting')
     const { error } = await supabase
       .from('newsletter_subscribers')
-      .insert({ email: email.trim().toLowerCase() })
+      .insert({ email: normalized })
 
     if (error) {
+      // Duplicate signups are expected; treat as already subscribed.
+      if (error.code === '23505') {
+        setStatus('success')
+        setEmail('')
+        return
+      }
       setStatus('error')
       return
     }
@@ -44,10 +57,11 @@ export function NewsletterForm({ compact = false, buttonLabel }: NewsletterFormP
         className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none ring-cyan-500/60 placeholder:text-zinc-500 focus:ring"
       />
       <button
-        className="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-cyan-400"
+        className="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-cyan-400 disabled:opacity-50"
         type="submit"
+        disabled={status === 'submitting'}
       >
-        {buttonLabel ?? (compact ? 'Subscribe' : 'Join newsletter')}
+        {status === 'submitting' ? 'Submitting…' : buttonLabel ?? (compact ? 'Subscribe' : 'Join newsletter')}
       </button>
       {status === 'success' && (
         <span className="text-xs text-emerald-400">
@@ -55,7 +69,7 @@ export function NewsletterForm({ compact = false, buttonLabel }: NewsletterFormP
         </span>
       )}
       {status === 'error' && (
-        <span className="text-xs text-red-400">Subscription failed.</span>
+        <span className="text-xs text-red-400">Subscription failed. Please try again.</span>
       )}
     </form>
   )

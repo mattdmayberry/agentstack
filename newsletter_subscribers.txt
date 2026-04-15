@@ -1,0 +1,7 @@
+# Branch log: newsletter_subscribers
+# (User request: "newsletter_subscribers" branch setup.)
+
+- Created branch newsletter_subscribers from latest main.
+- Newsletter: added 20260415 newsletter_subscribers migration (table, RLS, grants, admin-select policy).
+- NewsletterForm: submit state, duplicate email treated as success, and clearer failure message.
+- Header: Newsletter now opens a signup modal (close on backdrop or Esc) using NewsletterForm.
