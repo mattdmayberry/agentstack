@@ -3,6 +3,29 @@ import type { Article } from '../types'
 
 const CATEGORIES = ['MCP', 'API', 'Infra', 'Tooling', 'Opinion'] as const
 
+/** Same rules as admin form slug normalization (for uniqueness checks). */
+export function normalizeArticleSlug(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function formatPostgrestError(err: unknown): string {
+  if (err == null) return 'Unknown error'
+  if (typeof err !== 'object') return String(err)
+  const o = err as Record<string, unknown>
+  const parts = [
+    o.message != null ? String(o.message) : '',
+    o.details != null ? String(o.details) : '',
+    o.hint != null ? String(o.hint) : '',
+    o.code != null ? `code ${o.code}` : '',
+  ].filter((s) => s.length > 0)
+  return parts.length > 0 ? parts.join(' — ') : 'Request failed'
+}
+
 export type ArticleRow = {
   id: string
   slug: string
@@ -100,7 +123,7 @@ export type ArticleInsertRow = {
 export async function insertArticleAdmin(row: ArticleInsertRow): Promise<Article> {
   if (!supabase) throw new Error('Supabase is not configured')
   const { data, error } = await supabase.from('articles').insert(row).select('*').single()
-  if (error) throw error
+  if (error) throw new Error(formatPostgrestError(error))
   return rowToArticle(data as ArticleRow)
 }
 
@@ -115,8 +138,13 @@ export async function updateArticleAdmin(id: string, patch: ArticleAdminUpdate):
     .update({ ...patch, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select('*')
-    .single()
+    .maybeSingle()
 
-  if (error) throw error
+  if (error) throw new Error(formatPostgrestError(error))
+  if (!data) {
+    throw new Error(
+      'No row was updated. Refresh the page, confirm you are signed in as an admin, and try again.',
+    )
+  }
   return rowToArticle(data as ArticleRow)
 }
