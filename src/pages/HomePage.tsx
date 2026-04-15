@@ -7,7 +7,8 @@ import { getStoredArticles } from '../lib/articleStore'
 import { supabase } from '../lib/supabase'
 import type { Article } from '../types'
 
-const PAGE_SIZE = 2
+/** Articles shown initially and per “Load more” (grid is up to 3 columns on xl). */
+const PAGE_SIZE = 9
 
 export function HomePage() {
   const [page, setPage] = useState(1)
