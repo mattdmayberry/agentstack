@@ -4,6 +4,7 @@
 #   SUPABASE_ACCESS_TOKEN  https://supabase.com/dashboard/account/tokens
 #   SUPABASE_PROJECT_REF   Project → Settings → General → Reference ID
 #
+# Only runs when supabase/** (or this file) changes — NOT for public/, src/, etc.
 # Pull requests (same repo only): dry-run so merges are safe.
 # Push to main: applies pending migrations via supabase db push.
 # Manual: Actions → Supabase → Run workflow.

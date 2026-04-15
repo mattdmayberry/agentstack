@@ -1,33 +1,11 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import agentAutonomyThumb from '../assets/article-thumbs/agent-autonomy.jpg'
-import agentStackThumb from '../assets/article-thumbs/agent-stack.jpg'
-import agenticUiThumb from '../assets/article-thumbs/agentic-ui.jpg'
-import cliMcpThumb from '../assets/article-thumbs/cli-mcp.jpg'
-import cliWorkflowsThumb from '../assets/article-thumbs/cli-workflows.jpg'
-import functionCallingThumb from '../assets/article-thumbs/function-calling.jpg'
-import mcpProtocolThumb from '../assets/article-thumbs/mcp-protocol.jpg'
-import mcpRegistryThumb from '../assets/article-thumbs/mcp-registry.jpg'
+import { useArticleThumbnail } from '../hooks/useArticleThumbnail'
 import type { Article } from '../types'
 
 type FeedCardProps = {
   article: Article
   featured?: boolean
 }
-
-const defaultThumbByCategory: Record<Article['category'], string> = {
-  MCP: mcpProtocolThumb,
-  API: functionCallingThumb,
-  Infra: agentStackThumb,
-  Tooling: cliMcpThumb,
-  Opinion: agenticUiThumb,
-}
-
-const backupThumbs = [
-  agentAutonomyThumb,
-  cliWorkflowsThumb,
-  mcpRegistryThumb,
-]
 
 const categoryStyles: Record<Article['category'], string> = {
   MCP: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-300',
@@ -39,14 +17,7 @@ const categoryStyles: Record<Article['category'], string> = {
 
 export function FeedCard({ article, featured = false }: FeedCardProps) {
   const articlePath = `/article/${article.slug ?? article.id}`
-  const categoryThumb = defaultThumbByCategory[article.category]
-  const defaultThumb = backupThumbs[article.id.length % backupThumbs.length] ?? categoryThumb
-  const initialThumb = article.thumbnailUrl?.trim() ? article.thumbnailUrl : categoryThumb
-  const [thumbSrc, setThumbSrc] = useState(initialThumb)
-
-  useEffect(() => {
-    setThumbSrc(initialThumb)
-  }, [initialThumb])
+  const { src: thumbSrc, onError: onThumbError } = useArticleThumbnail(article)
 
   const daysDiff = Math.floor(
     (Date.now() - new Date(article.publishedAt).getTime()) / 86400000,
@@ -61,15 +32,7 @@ export function FeedCard({ article, featured = false }: FeedCardProps) {
           src={thumbSrc}
           alt={article.title}
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          onError={() => {
-            if (thumbSrc !== categoryThumb) {
-              setThumbSrc(categoryThumb)
-              return
-            }
-            if (thumbSrc !== defaultThumb) {
-              setThumbSrc(defaultThumb)
-            }
-          }}
+          onError={onThumbError}
         />
         </div>
       </Link>

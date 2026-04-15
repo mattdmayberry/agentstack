@@ -30,6 +30,9 @@ supabase/.temp/
 # Nested reference project (separate git repo)
 agentstack-ai-news/
 
+# Local editorial drafts (not app source; DB is canonical)
+day_0_articles.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

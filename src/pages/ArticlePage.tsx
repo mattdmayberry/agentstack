@@ -1,10 +1,23 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
+import { useArticleThumbnail } from '../hooks/useArticleThumbnail'
 import { fetchArticleBySlug } from '../lib/articleDb'
 import { getStoredArticles } from '../lib/articleStore'
 import { supabase } from '../lib/supabase'
 import type { Article } from '../types'
+
+function ArticleHeroImage({ article }: { article: Article }) {
+  const { src, onError } = useArticleThumbnail(article)
+  return (
+    <img
+      src={src}
+      alt={article.title}
+      className="mb-8 h-72 w-full rounded-lg object-cover"
+      onError={onError}
+    />
+  )
+}
 
 export function ArticlePage() {
   const { id: articleSlug } = useParams()
@@ -70,11 +83,7 @@ export function ArticlePage() {
         <p className="mb-8 text-zinc-400">
           {article.sourceName} • {new Date(article.publishedAt).toLocaleDateString()}
         </p>
-        <img
-          src={article.thumbnailUrl}
-          alt={article.title}
-          className="mb-8 h-72 w-full rounded-lg object-cover"
-        />
+        <ArticleHeroImage article={article} />
         <p className="text-xl leading-8 text-zinc-200">{article.content}</p>
         {article.sourceUrl && (
           <a

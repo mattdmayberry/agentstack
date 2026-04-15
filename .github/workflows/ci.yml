@@ -1,10 +1,14 @@
 name: CI
 
+# Runs on every push to main (all paths). Static assets under public/ are included.
+# Manual: Actions → CI → Run workflow.
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
