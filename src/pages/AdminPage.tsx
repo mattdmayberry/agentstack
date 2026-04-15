@@ -1,9 +1,10 @@
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { ChangeEvent, FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { canAccessAdmin } from '../lib/adminAccess'
 import { userIsAdmin } from '../lib/adminAuth'
 import { fetchAllArticlesAdmin, insertArticleAdmin, updateArticleAdmin } from '../lib/articleDb'
+import { uploadArticleAsset } from '../lib/articleStorage'
 import { supabase } from '../lib/supabase'
 import type { Article } from '../types'
 
@@ -41,9 +42,52 @@ export function AdminPage() {
   const [loginError, setLoginError] = useState('')
 
   const [draft, setDraft] = useState<AdminDraft>(defaultDraft)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [thumbnailUploading, setThumbnailUploading] = useState(false)
   const [articles, setArticles] = useState<Article[]>([])
   const [formMessage, setFormMessage] = useState('')
   const rows = useMemo(() => articles, [articles])
+
+  const articleToDraft = useCallback((article: Article): AdminDraft => {
+    return {
+      title: article.title,
+      slug: article.slug ?? '',
+      sourceUrl: article.sourceUrl ?? '',
+      sourceName: article.sourceName,
+      thumbnailUrl: article.thumbnailUrl ?? '',
+      summary: article.summary,
+      category: article.category,
+      content: article.content,
+      isFeatured: article.isFeatured,
+    }
+  }, [])
+
+  const cancelEdit = useCallback(() => {
+    setEditingId(null)
+    setDraft(defaultDraft)
+    setFormMessage('')
+  }, [])
+
+  async function handleThumbnailFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    if (!supabase) {
+      setFormMessage('Supabase is not configured.')
+      return
+    }
+    setThumbnailUploading(true)
+    setFormMessage('')
+    try {
+      const url = await uploadArticleAsset(file)
+      setDraft((current) => ({ ...current, thumbnailUrl: url }))
+      setFormMessage('Image uploaded — URL filled below.')
+    } catch (err) {
+      setFormMessage(err instanceof Error ? err.message : 'Upload failed.')
+    } finally {
+      setThumbnailUploading(false)
+    }
+  }
 
   const refreshAuth = useCallback(async () => {
     if (!supabase) {
@@ -159,12 +203,37 @@ export function AdminPage() {
       return
     }
 
-    if (articles.some((entry) => entry.slug === normalizedSlug)) {
+    const slugTaken = articles.some(
+      (entry) => entry.slug === normalizedSlug && entry.id !== editingId,
+    )
+    if (slugTaken) {
       setFormMessage('That slug is already in use.')
       return
     }
 
     try {
+      if (editingId) {
+        const existing = articles.find((a) => a.id === editingId)
+        const updated = await updateArticleAdmin(editingId, {
+          slug: normalizedSlug,
+          title: draft.title.trim(),
+          url: `/article/${normalizedSlug}`,
+          source_url: draft.sourceUrl.trim() || null,
+          source_name: draft.sourceName.trim() || sourceDomain,
+          source_domain: sourceDomain,
+          thumbnail_url: draft.thumbnailUrl.trim() || '',
+          summary: draft.summary.trim(),
+          category: draft.category,
+          is_featured: draft.isFeatured,
+          content: draft.content.trim(),
+          is_approved: existing?.isApproved ?? false,
+        })
+        setArticles((current) => current.map((entry) => (entry.id === editingId ? updated : entry)))
+        setDraft(articleToDraft(updated))
+        setFormMessage('Article updated.')
+        return
+      }
+
       const inserted = await insertArticleAdmin({
         slug: normalizedSlug,
         title: draft.title.trim(),
@@ -327,7 +396,20 @@ export function AdminPage() {
           </div>
         </div>
         <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-          <h2 className="mb-4 text-lg font-semibold">Add manual content</h2>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">
+              {editingId ? 'Edit article' : 'Add manual content'}
+            </h2>
+            {editingId ? (
+              <button
+                type="button"
+                className="rounded-md border border-zinc-600 px-3 py-1.5 text-sm hover:border-zinc-400"
+                onClick={() => cancelEdit()}
+              >
+                Cancel edit
+              </button>
+            ) : null}
+          </div>
           <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmit}>
             <input
               className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm"
@@ -365,6 +447,19 @@ export function AdminPage() {
                 setDraft((current) => ({ ...current, thumbnailUrl: event.target.value }))
               }
             />
+            <label className="flex flex-col gap-1 rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm md:col-span-2">
+              <span className="text-zinc-400">Upload image (stores in Supabase — URL fills above)</span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                className="text-xs text-zinc-300 file:mr-2 file:rounded file:border-0 file:bg-zinc-700 file:px-2 file:py-1"
+                disabled={thumbnailUploading}
+                onChange={(e) => void handleThumbnailFile(e)}
+              />
+              {thumbnailUploading ? (
+                <span className="text-xs text-zinc-500">Uploading…</span>
+              ) : null}
+            </label>
             <select
               className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm"
               value={draft.category}
@@ -405,13 +500,13 @@ export function AdminPage() {
               value={draft.content}
               onChange={(event) => setDraft((current) => ({ ...current, content: event.target.value }))}
             />
-            <div className="md:col-span-2 flex items-center justify-between">
+            <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs text-zinc-400">{formMessage}</p>
               <button
                 type="submit"
                 className="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-cyan-400"
               >
-                Add content
+                {editingId ? 'Save changes' : 'Add content'}
               </button>
             </div>
           </form>
@@ -425,6 +520,7 @@ export function AdminPage() {
                 <th className="px-4 py-3">Source link</th>
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Approved</th>
+                <th className="px-4 py-3">Edit</th>
               </tr>
             </thead>
             <tbody>
@@ -455,13 +551,11 @@ export function AdminPage() {
                         void (async () => {
                           const nextApproved = !article.isApproved
                           try {
-                            await updateArticleAdmin(article.id, { is_approved: nextApproved })
+                            const updated = await updateArticleAdmin(article.id, {
+                              is_approved: nextApproved,
+                            })
                             setArticles((current) =>
-                              current.map((entry) =>
-                                entry.id === article.id
-                                  ? { ...entry, isApproved: nextApproved }
-                                  : entry,
-                              ),
+                              current.map((entry) => (entry.id === article.id ? updated : entry)),
                             )
                           } catch (e) {
                             setFormMessage(e instanceof Error ? e.message : 'Could not update approval')
@@ -470,6 +564,19 @@ export function AdminPage() {
                       }}
                     >
                       {article.isApproved ? 'Approved' : 'Pending'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      className="rounded border border-cyan-700/60 px-2 py-1 text-cyan-400 hover:border-cyan-500"
+                      onClick={() => {
+                        setEditingId(article.id)
+                        setDraft(articleToDraft(article))
+                        setFormMessage('Editing — change fields and save.')
+                      }}
+                    >
+                      Edit
                     </button>
                   </td>
                 </tr>

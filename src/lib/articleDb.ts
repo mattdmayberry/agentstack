@@ -104,11 +104,19 @@ export async function insertArticleAdmin(row: ArticleInsertRow): Promise<Article
   return rowToArticle(data as ArticleRow)
 }
 
-export async function updateArticleAdmin(
-  id: string,
-  patch: Partial<Pick<ArticleRow, 'is_approved' | 'is_featured'>>,
-): Promise<void> {
+export type ArticleAdminUpdate = Partial<
+  Omit<ArticleRow, 'id' | 'created_at' | 'updated_at'>
+>
+
+export async function updateArticleAdmin(id: string, patch: ArticleAdminUpdate): Promise<Article> {
   if (!supabase) throw new Error('Supabase is not configured')
-  const { error } = await supabase.from('articles').update(patch).eq('id', id)
+  const { data, error } = await supabase
+    .from('articles')
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*')
+    .single()
+
   if (error) throw error
+  return rowToArticle(data as ArticleRow)
 }
