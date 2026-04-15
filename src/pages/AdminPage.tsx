@@ -44,20 +44,21 @@ export function AdminPage() {
   const [draft, setDraft] = useState<AdminDraft>(defaultDraft)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [thumbnailUploading, setThumbnailUploading] = useState(false)
+  const [savePending, setSavePending] = useState(false)
   const [articles, setArticles] = useState<Article[]>([])
   const [formMessage, setFormMessage] = useState('')
   const rows = useMemo(() => articles, [articles])
 
   const articleToDraft = useCallback((article: Article): AdminDraft => {
     return {
-      title: article.title,
+      title: article.title ?? '',
       slug: article.slug ?? '',
       sourceUrl: article.sourceUrl ?? '',
-      sourceName: article.sourceName,
+      sourceName: article.sourceName ?? '',
       thumbnailUrl: article.thumbnailUrl ?? '',
-      summary: article.summary,
+      summary: article.summary ?? '',
       category: article.category,
-      content: article.content,
+      content: article.content ?? '',
       isFeatured: article.isFeatured,
     }
   }, [])
@@ -171,28 +172,37 @@ export function AdminPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (savePending) return
 
-    if (!draft.title.trim() || !draft.slug.trim() || !draft.summary.trim() || !draft.content.trim()) {
+    setFormMessage('')
+
+    const title = (draft.title ?? '').trim()
+    const slugRaw = (draft.slug ?? '').trim()
+    const summary = (draft.summary ?? '').trim()
+    const content = (draft.content ?? '').trim()
+    const sourceUrl = (draft.sourceUrl ?? '').trim()
+    const sourceName = (draft.sourceName ?? '').trim()
+    const thumbnailUrl = (draft.thumbnailUrl ?? '').trim()
+
+    if (!title || !slugRaw || !summary || !content) {
       setFormMessage('Title, slug, summary, and content are required.')
       return
     }
 
-    if (draft.sourceUrl.trim()) {
+    if (sourceUrl) {
       try {
-        new URL(draft.sourceUrl)
+        new URL(sourceUrl)
       } catch {
         setFormMessage('Please enter a valid source link.')
         return
       }
     }
 
-    let sourceDomain = ''
-    sourceDomain = draft.sourceUrl.trim()
-      ? new URL(draft.sourceUrl.trim()).hostname.replace(/^www\./, '')
+    const sourceDomain = sourceUrl
+      ? new URL(sourceUrl).hostname.replace(/^www\./, '')
       : 'agentstack.fyi'
 
-    const normalizedSlug = draft.slug
-      .trim()
+    const normalizedSlug = slugRaw
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, '-')
       .replace(/-+/g, '-')
@@ -211,21 +221,22 @@ export function AdminPage() {
       return
     }
 
+    setSavePending(true)
     try {
       if (editingId) {
         const existing = articles.find((a) => a.id === editingId)
         const updated = await updateArticleAdmin(editingId, {
           slug: normalizedSlug,
-          title: draft.title.trim(),
+          title,
           url: `/article/${normalizedSlug}`,
-          source_url: draft.sourceUrl.trim() || null,
-          source_name: draft.sourceName.trim() || sourceDomain,
+          source_url: sourceUrl || null,
+          source_name: sourceName || sourceDomain,
           source_domain: sourceDomain,
-          thumbnail_url: draft.thumbnailUrl.trim() || '',
-          summary: draft.summary.trim(),
+          thumbnail_url: thumbnailUrl,
+          summary,
           category: draft.category,
           is_featured: draft.isFeatured,
-          content: draft.content.trim(),
+          content,
           is_approved: existing?.isApproved ?? false,
         })
         setArticles((current) => current.map((entry) => (entry.id === editingId ? updated : entry)))
@@ -236,18 +247,18 @@ export function AdminPage() {
 
       const inserted = await insertArticleAdmin({
         slug: normalizedSlug,
-        title: draft.title.trim(),
+        title,
         url: `/article/${normalizedSlug}`,
-        source_url: draft.sourceUrl.trim() || null,
-        source_name: draft.sourceName.trim() || sourceDomain,
+        source_url: sourceUrl || null,
+        source_name: sourceName || sourceDomain,
         source_domain: sourceDomain,
-        thumbnail_url: draft.thumbnailUrl.trim() || '',
-        summary: draft.summary.trim(),
+        thumbnail_url: thumbnailUrl,
+        summary,
         category: draft.category,
         published_at: new Date().toISOString(),
         is_approved: false,
         is_featured: draft.isFeatured,
-        content: draft.content.trim(),
+        content,
       })
       setArticles((current) => [inserted, ...current])
       setDraft(defaultDraft)
@@ -258,7 +269,15 @@ export function AdminPage() {
         setFormMessage('That slug is already in use.')
         return
       }
-      setFormMessage(err instanceof Error ? err.message : 'Could not save article.')
+      const msg =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message: string }).message)
+          : err instanceof Error
+            ? err.message
+            : 'Could not save article.'
+      setFormMessage(msg)
+    } finally {
+      setSavePending(false)
     }
   }
 
@@ -410,7 +429,15 @@ export function AdminPage() {
               </button>
             ) : null}
           </div>
-          <form className="grid gap-3 md:grid-cols-2" onSubmit={onSubmit}>
+          {formMessage ? (
+            <p
+              className="mb-4 rounded-md border border-zinc-600 bg-zinc-900/80 px-3 py-2 text-sm text-zinc-200"
+              role="status"
+            >
+              {formMessage}
+            </p>
+          ) : null}
+          <form className="grid gap-3 md:grid-cols-2" onSubmit={(e) => void onSubmit(e)}>
             <input
               className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm"
               placeholder="Title"
@@ -500,13 +527,13 @@ export function AdminPage() {
               value={draft.content}
               onChange={(event) => setDraft((current) => ({ ...current, content: event.target.value }))}
             />
-            <div className="md:col-span-2 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-zinc-400">{formMessage}</p>
+            <div className="md:col-span-2 flex flex-wrap items-center justify-end gap-2">
               <button
                 type="submit"
-                className="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-cyan-400"
+                disabled={savePending || thumbnailUploading}
+                className="rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-zinc-950 hover:bg-cyan-400 disabled:opacity-50"
               >
-                {editingId ? 'Save changes' : 'Add content'}
+                {savePending ? 'Saving…' : editingId ? 'Save changes' : 'Add content'}
               </button>
             </div>
           </form>
