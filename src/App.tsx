@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { AdminHostGate } from './components/AdminHostGate'
 import { canAccessAdmin, getAdminRoutePath } from './lib/adminAccess'
 import { AdminPage } from './pages/AdminPage'
 import { ArticlePage } from './pages/ArticlePage'
@@ -14,7 +15,7 @@ function App() {
       <Route path="/article/:id" element={<ArticlePage />} />
       <Route
         path={adminPath}
-        element={adminAllowed ? <AdminPage /> : <Navigate to="/" replace />}
+        element={adminAllowed ? <AdminPage /> : <AdminHostGate />}
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
