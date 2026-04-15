@@ -148,3 +148,9 @@ export async function updateArticleAdmin(id: string, patch: ArticleAdminUpdate):
   }
   return rowToArticle(data as ArticleRow)
 }
+
+export async function deleteArticleAdmin(id: string): Promise<void> {
+  if (!supabase) throw new Error('Supabase is not configured')
+  const { error } = await supabase.from('articles').delete().eq('id', id)
+  if (error) throw new Error(formatPostgrestError(error))
+}

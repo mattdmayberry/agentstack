@@ -7,3 +7,4 @@
 - Admin: edit existing articles in form; image upload to Supabase Storage (article-assets); migration 20260414120000_article_assets_storage.sql; updateArticleAdmin returns Article.
 - Admin: fix Save changes (safe trim, top status banner, saving state) so submit errors aren’t silent.
 - Admin: improve updateArticleAdmin error handling (formatted PostgREST errors + no-row-updated message) to diagnose Save changes failures.
+- Admin: add delete action in articles table with confirm + optimistic list update; add deleteArticleAdmin() data helper.

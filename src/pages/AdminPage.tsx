@@ -3,7 +3,12 @@ import { Link } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { canAccessAdmin } from '../lib/adminAccess'
 import { userIsAdmin } from '../lib/adminAuth'
-import { fetchAllArticlesAdmin, insertArticleAdmin, updateArticleAdmin } from '../lib/articleDb'
+import {
+  deleteArticleAdmin,
+  fetchAllArticlesAdmin,
+  insertArticleAdmin,
+  updateArticleAdmin,
+} from '../lib/articleDb'
 import { uploadArticleAsset } from '../lib/articleStorage'
 import { supabase } from '../lib/supabase'
 import type { Article } from '../types'
@@ -45,6 +50,7 @@ export function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [thumbnailUploading, setThumbnailUploading] = useState(false)
   const [savePending, setSavePending] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [articles, setArticles] = useState<Article[]>([])
   const [formMessage, setFormMessage] = useState('')
   const rows = useMemo(() => articles, [articles])
@@ -548,6 +554,7 @@ export function AdminPage() {
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Approved</th>
                 <th className="px-4 py-3">Edit</th>
+                <th className="px-4 py-3">Delete</th>
               </tr>
             </thead>
             <tbody>
@@ -604,6 +611,34 @@ export function AdminPage() {
                       }}
                     >
                       Edit
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      disabled={deletingId === article.id}
+                      className="rounded border border-red-700/60 px-2 py-1 text-red-400 hover:border-red-500 disabled:opacity-50"
+                      onClick={() => {
+                        const ok = window.confirm(`Delete "${article.title}"? This cannot be undone.`)
+                        if (!ok) return
+                        void (async () => {
+                          setDeletingId(article.id)
+                          try {
+                            await deleteArticleAdmin(article.id)
+                            setArticles((current) => current.filter((entry) => entry.id !== article.id))
+                            if (editingId === article.id) {
+                              cancelEdit()
+                            }
+                            setFormMessage('Article deleted.')
+                          } catch (e) {
+                            setFormMessage(e instanceof Error ? e.message : 'Could not delete article')
+                          } finally {
+                            setDeletingId(null)
+                          }
+                        })()
+                      }}
+                    >
+                      {deletingId === article.id ? 'Deleting…' : 'Delete'}
                     </button>
                   </td>
                 </tr>
