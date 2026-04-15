@@ -4,3 +4,4 @@
 - Created branch admin-panel-updates from current HEAD (main).
 - Admin: replace silent redirect to home with AdminHostGate when admin path is hit on consumer hostname; add getPublicAdminEntryUrl() and optional VITE_PUBLIC_ADMIN_ORIGIN; allow 127.0.0.1 like localhost.
 - Admin: VITE_ADMIN_EXTRA_HOSTS (comma-separated) to allow admin on apex/www without admin subdomain; AdminHostGate copy + .env.example updated.
+- Admin: edit existing articles in form; image upload to Supabase Storage (article-assets); migration 20260414120000_article_assets_storage.sql; updateArticleAdmin returns Article.
