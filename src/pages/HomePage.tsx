@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FeedCard } from '../components/FeedCard'
 import { NewsletterForm } from '../components/NewsletterForm'
 import { SiteHeader } from '../components/SiteHeader'
@@ -15,6 +15,7 @@ export function HomePage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [feedError, setFeedError] = useState('')
   const [activeCategory, setActiveCategory] = useState<'All' | 'MCP' | 'API' | 'Infra' | 'Tooling' | 'Opinion'>('All')
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -66,6 +67,7 @@ export function HomePage() {
       ? feedSourceArticles
       : feedSourceArticles.filter((article) => article.category === activeCategory)
   const visibleArticles = filteredArticles.slice(0, PAGE_SIZE * page)
+  const hasMore = visibleArticles.length < filteredArticles.length
   const categories: Array<'All' | 'MCP' | 'API' | 'Infra' | 'Tooling' | 'Opinion'> = [
     'All',
     'MCP',
@@ -74,6 +76,23 @@ export function HomePage() {
     'Tooling',
     'Opinion',
   ]
+
+  useEffect(() => {
+    if (!hasMore || !loadMoreRef.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0]
+        if (first?.isIntersecting) {
+          setPage((current) => current + 1)
+        }
+      },
+      { rootMargin: '320px 0px 320px 0px' },
+    )
+
+    observer.observe(loadMoreRef.current)
+    return () => observer.disconnect()
+  }, [hasMore])
 
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -191,17 +210,7 @@ export function HomePage() {
           </p>
         )}
 
-        {visibleArticles.length < filteredArticles.length ? (
-          <div className="mt-6">
-            <button
-              className="rounded-md border border-zinc-700 px-4 py-2 text-sm hover:border-zinc-500"
-              type="button"
-              onClick={() => setPage((current) => current + 1)}
-            >
-              Load more
-            </button>
-          </div>
-        ) : null}
+        {hasMore ? <div ref={loadMoreRef} className="mt-6 h-4 w-full" aria-hidden /> : null}
       </section>
 
       <footer className="border-t border-zinc-800">

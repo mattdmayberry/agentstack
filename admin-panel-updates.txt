@@ -8,3 +8,4 @@
 - Admin: fix Save changes (safe trim, top status banner, saving state) so submit errors aren’t silent.
 - Admin: improve updateArticleAdmin error handling (formatted PostgREST errors + no-row-updated message) to diagnose Save changes failures.
 - Admin: add delete action in articles table with confirm + optimistic list update; add deleteArticleAdmin() data helper.
+- Home: replace manual Load more with infinite scroll (IntersectionObserver sentinel prefetch).
