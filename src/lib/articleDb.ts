@@ -42,7 +42,21 @@ export type ArticleRow = {
   updated_at: string
   is_approved: boolean
   is_featured: boolean
+  display_order: number
   content: string
+}
+
+/** Featured items first; then ascending display_order; then newest published_at. */
+export function compareArticlesFeedOrder(a: Article, b: Article): number {
+  if (a.isFeatured !== b.isFeatured) {
+    return a.isFeatured ? -1 : 1
+  }
+  const da = a.displayOrder ?? 0
+  const db = b.displayOrder ?? 0
+  if (da !== db) {
+    return da - db
+  }
+  return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
 }
 
 export function rowToArticle(row: ArticleRow): Article {
@@ -63,6 +77,7 @@ export function rowToArticle(row: ArticleRow): Article {
     createdAt: row.created_at,
     isApproved: row.is_approved,
     isFeatured: row.is_featured,
+    displayOrder: row.display_order ?? 0,
     content: row.content,
   }
 }
@@ -73,6 +88,8 @@ export async function fetchApprovedArticles(): Promise<Article[]> {
     .from('articles')
     .select('*')
     .eq('is_approved', true)
+    .order('is_featured', { ascending: false })
+    .order('display_order', { ascending: true })
     .order('published_at', { ascending: false })
 
   if (error) throw error
@@ -98,7 +115,9 @@ export async function fetchAllArticlesAdmin(): Promise<Article[]> {
   const { data, error } = await supabase
     .from('articles')
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('is_featured', { ascending: false })
+    .order('display_order', { ascending: true })
+    .order('published_at', { ascending: false })
 
   if (error) throw error
   return ((data ?? []) as ArticleRow[]).map(rowToArticle)
@@ -117,6 +136,7 @@ export type ArticleInsertRow = {
   published_at: string
   is_approved: boolean
   is_featured: boolean
+  display_order?: number
   content: string
 }
 

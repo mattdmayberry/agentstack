@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { FeedCard } from '../components/FeedCard'
 import { NewsletterForm } from '../components/NewsletterForm'
 import { SiteHeader } from '../components/SiteHeader'
-import { fetchApprovedArticles } from '../lib/articleDb'
+import { compareArticlesFeedOrder, fetchApprovedArticles } from '../lib/articleDb'
 import { getStoredArticles } from '../lib/articleStore'
 import { supabase } from '../lib/supabase'
 import type { Article } from '../types'
@@ -48,12 +48,7 @@ export function HomePage() {
     () =>
       [...articles]
         .filter((article) => article.isApproved)
-        .sort((a, b) => {
-        if (a.isFeatured !== b.isFeatured) {
-          return a.isFeatured ? -1 : 1
-        }
-        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-      }),
+        .sort(compareArticlesFeedOrder),
     [articles],
   )
 
@@ -76,6 +71,49 @@ export function HomePage() {
     'Tooling',
     'Opinion',
   ]
+
+  useEffect(() => {
+    const siteTitle = 'AgentStack.fyi'
+    const title = 'AgentStack.fyi — AI Agent Infrastructure News'
+    const description =
+      'Track MCP, APIs, and agent infrastructure updates without the noise. High-signal coverage for builders.'
+    const canonicalHref = `${window.location.origin}/`
+    const ogImage = `${window.location.origin}/agent_stack_19fad7.png`
+
+    const setMeta = (attr: 'name' | 'property', key: string, value: string) => {
+      let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute(attr, key)
+        document.head.appendChild(el)
+      }
+      el.content = value
+    }
+
+    const setCanonical = (href: string) => {
+      let link = document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null
+      if (!link) {
+        link = document.createElement('link')
+        link.rel = 'canonical'
+        document.head.appendChild(link)
+      }
+      link.href = href
+    }
+
+    document.title = title
+    setCanonical(canonicalHref)
+    setMeta('name', 'description', description)
+    setMeta('property', 'og:type', 'website')
+    setMeta('property', 'og:site_name', siteTitle)
+    setMeta('property', 'og:title', title)
+    setMeta('property', 'og:description', description)
+    setMeta('property', 'og:url', canonicalHref)
+    setMeta('property', 'og:image', ogImage)
+    setMeta('name', 'twitter:card', 'summary_large_image')
+    setMeta('name', 'twitter:title', title)
+    setMeta('name', 'twitter:description', description)
+    setMeta('name', 'twitter:image', ogImage)
+  }, [])
 
   useEffect(() => {
     if (!hasMore || !loadMoreRef.current) return

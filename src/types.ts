@@ -11,6 +11,8 @@ export type Article = {
   category: 'MCP' | 'API' | 'Infra' | 'Tooling' | 'Opinion'
   publishedAt: string
   createdAt?: string
+  /** Lower value appears earlier within the same featured / non-featured group. */
+  displayOrder: number
   isApproved: boolean
   isFeatured: boolean
   content: string

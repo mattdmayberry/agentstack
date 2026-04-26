@@ -14,6 +14,7 @@ export const mockArticles: Article[] = [
       'A practical breakdown of how orchestration, tools, memory, and runtime guardrails combine into an effective agent architecture.',
     category: 'Infra',
     publishedAt: '2026-04-13T08:00:00.000Z',
+    displayOrder: 0,
     isApproved: true,
     isFeatured: true,
     content:
@@ -32,6 +33,7 @@ export const mockArticles: Article[] = [
       'Protocol-level interoperability is reducing integration cost across CLIs, IDE agents, and hosted runtimes.',
     category: 'MCP',
     publishedAt: '2026-04-12T16:00:00.000Z',
+    displayOrder: 0,
     isApproved: true,
     isFeatured: false,
     content:
@@ -50,6 +52,7 @@ export const mockArticles: Article[] = [
       'APIs remain foundational, but interaction is moving up a layer where autonomous workflows drive value.',
     category: 'Opinion',
     publishedAt: '2026-04-12T10:30:00.000Z',
+    displayOrder: 0,
     isApproved: true,
     isFeatured: false,
     content:

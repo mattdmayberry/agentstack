@@ -4,6 +4,7 @@ import { SiteHeader } from '../components/SiteHeader'
 import { canAccessAdmin } from '../lib/adminAccess'
 import { userIsAdmin } from '../lib/adminAuth'
 import {
+  compareArticlesFeedOrder,
   deleteArticleAdmin,
   fetchAllArticlesAdmin,
   insertArticleAdmin,
@@ -51,9 +52,10 @@ export function AdminPage() {
   const [thumbnailUploading, setThumbnailUploading] = useState(false)
   const [savePending, setSavePending] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [reorderingId, setReorderingId] = useState<string | null>(null)
   const [articles, setArticles] = useState<Article[]>([])
   const [formMessage, setFormMessage] = useState('')
-  const rows = useMemo(() => articles, [articles])
+  const rows = useMemo(() => [...articles].sort(compareArticlesFeedOrder), [articles])
 
   const articleToDraft = useCallback((article: Article): AdminDraft => {
     return {
@@ -74,6 +76,41 @@ export function AdminPage() {
     setDraft(defaultDraft)
     setFormMessage('')
   }, [])
+
+  const moveArticleInTier = useCallback(
+    async (articleId: string, direction: 'up' | 'down') => {
+      if (reorderingId) return
+      const article = articles.find((a) => a.id === articleId)
+      if (!article) return
+
+      const tier = articles
+        .filter((a) => a.isFeatured === article.isFeatured)
+        .sort(compareArticlesFeedOrder)
+      const idx = tier.findIndex((a) => a.id === articleId)
+      if (idx < 0) return
+      const j = direction === 'up' ? idx - 1 : idx + 1
+      if (j < 0 || j >= tier.length) return
+
+      const nextOrder = [...tier]
+      ;[nextOrder[idx], nextOrder[j]] = [nextOrder[j], nextOrder[idx]]
+
+      setReorderingId(articleId)
+      setFormMessage('')
+      try {
+        await Promise.all(
+          nextOrder.map((a, i) => updateArticleAdmin(a.id, { display_order: i })),
+        )
+        const list = await fetchAllArticlesAdmin()
+        setArticles(list)
+        setFormMessage('Order updated.')
+      } catch (e) {
+        setFormMessage(e instanceof Error ? e.message : 'Could not reorder')
+      } finally {
+        setReorderingId(null)
+      }
+    },
+    [articles, reorderingId],
+  )
 
   async function handleThumbnailFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -127,6 +164,20 @@ export function AdminPage() {
     })
     return () => subscription.unsubscribe()
   }, [adminHost, refreshAuth])
+
+  useEffect(() => {
+    const setMeta = (attr: 'name' | 'property', key: string, value: string) => {
+      let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute(attr, key)
+        document.head.appendChild(el)
+      }
+      el.content = value
+    }
+    setMeta('name', 'robots', 'noindex, nofollow')
+    document.title = 'Admin — AgentStack.fyi'
+  }, [])
 
   useEffect(() => {
     if (gate !== 'ok' || !supabase) {
@@ -552,13 +603,19 @@ export function AdminPage() {
                 <th className="px-4 py-3">Source</th>
                 <th className="px-4 py-3">Source link</th>
                 <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">Feed order</th>
                 <th className="px-4 py-3">Approved</th>
                 <th className="px-4 py-3">Edit</th>
                 <th className="px-4 py-3">Delete</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((article) => (
+              {rows.map((article) => {
+                const tierList = rows.filter((a) => a.isFeatured === article.isFeatured)
+                const tierIdx = tierList.findIndex((a) => a.id === article.id)
+                const tierLen = tierList.length
+                const busy = reorderingId !== null
+                return (
                 <tr key={article.id} className="border-t border-zinc-800">
                   <td className="px-4 py-3 text-zinc-100">{article.title}</td>
                   <td className="px-4 py-3 text-zinc-400">{article.sourceName}</td>
@@ -577,6 +634,28 @@ export function AdminPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-zinc-400">{article.category}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-1">
+                      <button
+                        type="button"
+                        aria-label="Move up in homepage order (within featured or non-featured)"
+                        disabled={busy || tierIdx <= 0}
+                        className="rounded border border-zinc-700 px-2 py-1 hover:border-zinc-500 disabled:opacity-40"
+                        onClick={() => void moveArticleInTier(article.id, 'up')}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Move down in homepage order (within featured or non-featured)"
+                        disabled={busy || tierIdx < 0 || tierIdx >= tierLen - 1}
+                        className="rounded border border-zinc-700 px-2 py-1 hover:border-zinc-500 disabled:opacity-40"
+                        onClick={() => void moveArticleInTier(article.id, 'down')}
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <button
                       type="button"
@@ -642,7 +721,8 @@ export function AdminPage() {
                     </button>
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
