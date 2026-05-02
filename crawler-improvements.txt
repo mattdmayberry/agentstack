@@ -7,3 +7,4 @@ Log of changes (newest last):
 - index.html: default meta description for crawlers that only fetch shell HTML.
 - Mobile: FeedCard link row, ArticlePage typography/hero, SiteHeader touch targets, HomePage category chips, AdminPage horizontal scroll for table.
 - eslint: ignore api/ (Edge handler). .env.example note for sitemap env usage.
+- Commit f9e82d0; pushed branch crawler-improvements to origin.
