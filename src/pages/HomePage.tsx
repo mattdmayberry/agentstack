@@ -135,16 +135,16 @@ export function HomePage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
       <SiteHeader />
-      <section className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-        <div className="relative mb-8 overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-cyan-950/30 p-6 md:p-8">
+      <section className="mx-auto max-w-6xl px-3 py-8 sm:px-4 sm:py-10 md:py-14">
+        <div className="relative mb-8 overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-cyan-950/30 p-4 sm:p-6 md:p-8">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-cyan-500/15 blur-3xl" />
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="max-w-2xl">
               <p className="mb-2 text-xs uppercase tracking-[0.2em] text-cyan-300">AgentStack.fyi</p>
-              <h1 className="mb-3 text-3xl font-bold leading-tight md:text-4xl">
+              <h1 className="mb-3 text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
                 The signal hub for the AI agent stack.
               </h1>
-              <p className="mb-5 text-zinc-300 md:text-lg">
+              <p className="mb-5 text-sm text-zinc-300 sm:text-base md:text-lg">
                 Track MCP, APIs, and agent infrastructure updates without the noise.
               </p>
               <div id="newsletter">
@@ -196,7 +196,7 @@ export function HomePage() {
                   setActiveCategory(category)
                   setPage(1)
                 }}
-                className={`rounded-full border px-3 py-1 text-xs transition ${
+                className={`touch-manipulation rounded-full border px-3 py-2 text-xs transition sm:min-h-10 sm:py-1.5 ${
                   activeCategory === category
                     ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
                     : 'border-zinc-700/80 bg-zinc-900/70 text-zinc-300 hover:border-zinc-500'
@@ -217,7 +217,7 @@ export function HomePage() {
                 setActiveCategory(category)
                 setPage(1)
               }}
-              className={`rounded-full border px-3 py-1 text-xs transition ${
+              className={`touch-manipulation min-h-10 rounded-full border px-3 py-2 text-xs transition active:bg-zinc-800/80 ${
                 activeCategory === category
                   ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
                   : 'border-zinc-700/80 bg-zinc-900/70 text-zinc-300 hover:border-zinc-500'
@@ -252,7 +252,7 @@ export function HomePage() {
       </section>
 
       <footer className="border-t border-zinc-800">
-        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-6">
+        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-3 py-6 sm:px-4">
           <p className="text-sm text-zinc-400">Stay current with the AI agent stack.</p>
           <NewsletterForm compact />
         </div>

@@ -36,7 +36,7 @@ export function FeedCard({ article, featured = false }: FeedCardProps) {
         />
         </div>
       </Link>
-      <div className={`p-5 ${featured ? 'md:p-6' : ''}`}>
+      <div className={`p-4 sm:p-5 ${featured ? 'md:p-6' : ''}`}>
         <div className="mb-3 flex items-center justify-between gap-2">
           <span
             className={`rounded-md border px-2.5 py-1 text-xs font-medium ${categoryStyles[article.category]}`}
@@ -50,16 +50,16 @@ export function FeedCard({ article, featured = false }: FeedCardProps) {
             {article.title}
           </h2>
         </Link>
-        <p className="mb-4 text-sm leading-6 text-zinc-300">{article.summary}</p>
-        <div className="flex items-center justify-between text-sm">
-          <span className="inline-flex items-center gap-2 text-zinc-500">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400/70" />
-            {article.sourceName}
+        <p className="mb-4 text-sm leading-relaxed text-zinc-300 sm:leading-6">{article.summary}</p>
+        <div className="flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+          <span className="inline-flex min-h-11 items-center gap-2 text-zinc-500">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400/70" />
+            <span className="break-words">{article.sourceName}</span>
           </span>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:gap-3">
             {article.sourceUrl && (
               <a
-                className="font-medium text-zinc-400 hover:text-zinc-200"
+                className="inline-flex min-h-11 min-w-[5.5rem] items-center justify-center rounded-md border border-zinc-700/80 px-3 font-medium text-zinc-300 hover:border-zinc-500 hover:text-zinc-100 active:bg-zinc-800/80"
                 href={article.sourceUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -67,7 +67,10 @@ export function FeedCard({ article, featured = false }: FeedCardProps) {
                 Source
               </a>
             )}
-            <Link className="font-medium text-cyan-400 hover:text-cyan-300" to={articlePath}>
+            <Link
+              className="inline-flex min-h-11 min-w-[6.5rem] items-center justify-center rounded-md border border-cyan-700/50 bg-cyan-500/10 px-3 font-medium text-cyan-300 hover:border-cyan-500 hover:bg-cyan-500/15 active:bg-cyan-500/20"
+              to={articlePath}
+            >
               Read analysis
             </Link>
           </div>

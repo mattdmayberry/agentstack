@@ -455,23 +455,26 @@ export function AdminPage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
       <SiteHeader />
-      <section className="mx-auto max-w-5xl px-4 py-10">
+      <section className="mx-auto max-w-5xl px-3 py-8 sm:px-4 sm:py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold">Admin moderation</h1>
-          <div className="flex items-center gap-4">
+          <h1 className="text-xl font-bold sm:text-2xl">Admin moderation</h1>
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               type="button"
-              className="text-sm text-zinc-400 hover:text-zinc-200"
+              className="inline-flex min-h-10 items-center rounded-md px-2 text-sm text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200 active:bg-zinc-900"
               onClick={() => void onSignOut()}
             >
               Sign out
             </button>
-            <Link to="/" className="text-sm text-cyan-400">
+            <Link
+              to="/"
+              className="inline-flex min-h-10 items-center rounded-md px-2 text-sm text-cyan-400 hover:text-cyan-300"
+            >
               Back to feed
             </Link>
           </div>
         </div>
-        <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+        <div className="mb-6 rounded-xl border border-zinc-800 bg-zinc-900 p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">
               {editingId ? 'Edit article' : 'Add manual content'}
@@ -595,7 +598,8 @@ export function AdminPage() {
             </div>
           </form>
         </div>
-        <div className="overflow-hidden rounded-lg border border-zinc-800">
+        <div className="-mx-3 overflow-x-auto overscroll-x-contain px-3 sm:mx-0 sm:px-0">
+          <div className="min-w-[56rem] rounded-lg border border-zinc-800">
           <table className="w-full border-collapse text-left text-sm">
             <thead className="bg-zinc-900 text-zinc-300">
               <tr>
@@ -725,6 +729,7 @@ export function AdminPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       </section>
     </main>

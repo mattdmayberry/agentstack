@@ -15,7 +15,7 @@ function ArticleHeroImage({ article }: { article: Article }) {
     <img
       src={src}
       alt={article.title}
-      className="mb-8 h-72 w-full rounded-lg object-cover"
+      className="mb-6 h-44 w-full rounded-lg object-cover sm:mb-8 sm:h-60 md:h-72"
       onError={onError}
     />
   )
@@ -148,6 +148,7 @@ export function ArticlePage() {
     return (
       <main className="min-h-screen bg-zinc-950 text-zinc-100">
         <SiteHeader />
+        <p className="px-3 py-8 text-center text-sm text-zinc-500 sm:px-4">Loading…</p>
       </main>
     )
   }
@@ -156,7 +157,7 @@ export function ArticlePage() {
     return (
       <main className="min-h-screen bg-zinc-950 text-zinc-100">
         <SiteHeader />
-        <div className="mx-auto max-w-3xl px-4 py-10">
+        <div className="mx-auto max-w-3xl px-3 py-8 sm:px-4 sm:py-10">
           <p className="mb-4 text-zinc-400">Article not found.</p>
           <Link className="text-cyan-400" to="/">
             Back to feed
@@ -169,23 +170,41 @@ export function ArticlePage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
       <SiteHeader />
-      <article className="mx-auto max-w-3xl px-4 py-10">
-        <p className="mb-4 text-xs uppercase tracking-widest text-cyan-400">{article.category}</p>
-        <h1 className="mb-4 text-4xl font-bold leading-tight">{article.title}</h1>
-        <p className="mb-8 text-zinc-400">
+      <article className="mx-auto max-w-3xl px-3 py-8 sm:px-4 sm:py-10">
+        <p className="mb-3 text-xs uppercase tracking-widest text-cyan-400 sm:mb-4">{article.category}</p>
+        <h1 className="mb-3 text-2xl font-bold leading-tight sm:mb-4 sm:text-3xl md:text-4xl">
+          {article.title}
+        </h1>
+        <p className="mb-6 text-sm text-zinc-400 sm:mb-8 sm:text-base">
           {article.sourceName} • {new Date(article.publishedAt).toLocaleDateString()}
         </p>
         <ArticleHeroImage article={article} />
-        <div className="space-y-4 text-zinc-200">
+        <div className="space-y-3 text-zinc-200 sm:space-y-4">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              h1: ({ children }) => <h2 className="text-3xl font-semibold leading-tight">{children}</h2>,
-              h2: ({ children }) => <h3 className="text-2xl font-semibold leading-tight">{children}</h3>,
-              h3: ({ children }) => <h4 className="text-xl font-semibold leading-tight">{children}</h4>,
-              p: ({ children }) => <p className="text-xl leading-8">{children}</p>,
-              ul: ({ children }) => <ul className="list-disc space-y-2 pl-6 text-lg leading-8">{children}</ul>,
-              ol: ({ children }) => <ol className="list-decimal space-y-2 pl-6 text-lg leading-8">{children}</ol>,
+              h1: ({ children }) => (
+                <h2 className="text-xl font-semibold leading-snug sm:text-2xl md:text-3xl">{children}</h2>
+              ),
+              h2: ({ children }) => (
+                <h3 className="text-lg font-semibold leading-snug sm:text-xl md:text-2xl">{children}</h3>
+              ),
+              h3: ({ children }) => (
+                <h4 className="text-base font-semibold leading-snug sm:text-lg md:text-xl">{children}</h4>
+              ),
+              p: ({ children }) => (
+                <p className="text-base leading-7 sm:text-lg sm:leading-8 md:text-xl md:leading-8">{children}</p>
+              ),
+              ul: ({ children }) => (
+                <ul className="list-disc space-y-2 pl-5 text-base leading-7 sm:pl-6 sm:text-lg sm:leading-8">
+                  {children}
+                </ul>
+              ),
+              ol: ({ children }) => (
+                <ol className="list-decimal space-y-2 pl-5 text-base leading-7 sm:pl-6 sm:text-lg sm:leading-8">
+                  {children}
+                </ol>
+              ),
               blockquote: ({ children }) => (
                 <blockquote className="border-l-2 border-cyan-500/50 pl-4 text-zinc-300">{children}</blockquote>
               ),

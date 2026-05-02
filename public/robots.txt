@@ -1,0 +1,10 @@
+# https://agentstack.fyi — allow indexing of public pages (CSR shell + client routing).
+# Admin UI is gated by hostname; still avoid listing unknown admin paths here.
+
+User-agent: *
+Allow: /
+
+# If you add a public API surface, tighten this line.
+Disallow: /api/
+
+Sitemap: https://agentstack.fyi/sitemap.xml

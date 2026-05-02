@@ -1,0 +1,9 @@
+Branch: crawler-improvements
+Log of changes (newest last):
+
+- Created branch crawler-improvements from main.
+- Added public/robots.txt and public/llms.txt for crawler/LLM discovery.
+- Added api/sitemap.ts (Vercel Edge) + vercel.json rewrite /sitemap.xml → dynamic article URLs from Supabase.
+- index.html: default meta description for crawlers that only fetch shell HTML.
+- Mobile: FeedCard link row, ArticlePage typography/hero, SiteHeader touch targets, HomePage category chips, AdminPage horizontal scroll for table.
+- eslint: ignore api/ (Edge handler). .env.example note for sitemap env usage.

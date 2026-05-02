@@ -1,0 +1,25 @@
+# AgentStack.fyi
+
+> High-signal news and analysis on the AI agent stack: MCP, APIs, CLIs, orchestration, and production agent infrastructure.
+
+AgentStack.fyi is a curated publication for builders tracking how software is shifting from traditional APIs and UIs toward agent-driven systems.
+
+## What you will find
+
+- A homepage feed of approved articles with summaries, categories, and links to deeper analysis on-site.
+- Long-form analysis pages at `/article/{slug}` with editorial commentary (Markdown).
+
+## Primary audience
+
+- AI engineers and platform teams
+- Founders building agent tooling and infra
+- Practitioners following MCP and agent runtime evolution
+
+## Contact / site
+
+- Site: https://agentstack.fyi
+- Newsletter signup is available from the site header (email collection for product updates).
+
+## Technical note for crawlers
+
+The web app is a React single-page application. URLs like `/article/{slug}` are real routes resolved in the browser; a `sitemap.xml` is provided for URL discovery. For the richest metadata per article, prefer fetching after render or using linked Open Graph fields when available.
