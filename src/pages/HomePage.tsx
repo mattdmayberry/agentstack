@@ -14,6 +14,7 @@ export function HomePage() {
   const [page, setPage] = useState(1)
   const [articles, setArticles] = useState<Article[]>([])
   const [feedError, setFeedError] = useState('')
+  const [feedReady, setFeedReady] = useState(false)
   const [activeCategory, setActiveCategory] = useState<'All' | 'MCP' | 'API' | 'Infra' | 'Tooling' | 'Opinion'>('All')
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
@@ -37,6 +38,10 @@ export function HomePage() {
           setFeedError(e instanceof Error ? e.message : 'Could not load articles')
           setArticles([])
         }
+      } finally {
+        if (!cancelled) {
+          setFeedReady(true)
+        }
       }
     })()
     return () => {
@@ -53,10 +58,10 @@ export function HomePage() {
   )
 
   const featuredArticles = sortedArticles.filter((article) => article.isFeatured)
-  const showFeaturedSection = featuredArticles.length > 1
-  const feedSourceArticles = showFeaturedSection
-    ? sortedArticles.filter((article) => !article.isFeatured)
-    : sortedArticles
+  const nonFeaturedArticles = sortedArticles.filter((article) => !article.isFeatured)
+  /** Only split “Featured” out when there is something left for Latest; otherwise Latest was empty. */
+  const showFeaturedSection = featuredArticles.length > 1 && nonFeaturedArticles.length > 0
+  const feedSourceArticles = showFeaturedSection ? nonFeaturedArticles : sortedArticles
   const filteredArticles =
     activeCategory === 'All'
       ? feedSourceArticles
@@ -242,10 +247,29 @@ export function HomePage() {
           ))}
         </div>
 
-        {visibleArticles.length === 0 && (
-          <p className="rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-8 text-center text-sm text-zinc-400">
-            No articles in this category yet.
-          </p>
+        {feedReady && visibleArticles.length === 0 && (
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-8 text-center text-sm text-zinc-400">
+            {articles.length === 0 && supabase ? (
+              <div className="mx-auto max-w-lg space-y-3 text-left text-zinc-300">
+                <p className="font-medium text-zinc-200">No approved articles returned from Supabase.</p>
+                <p>Common fixes:</p>
+                <ul className="list-disc space-y-2 pl-5 text-zinc-400">
+                  <li>
+                    Local DB empty: run migrations, then{' '}
+                    <code className="text-cyan-400">npm run sync:articles-from-remote</code> (see{' '}
+                    <code className="text-zinc-500">.env.example</code>) or temporarily point{' '}
+                    <code className="text-zinc-500">VITE_SUPABASE_*</code> at hosted Supabase.
+                  </li>
+                  <li>
+                    Nothing is <code className="text-zinc-500">is_approved</code> yet — use the admin panel to approve
+                    rows.
+                  </li>
+                </ul>
+              </div>
+            ) : (
+              <p>No articles in this category yet.</p>
+            )}
+          </div>
         )}
 
         {hasMore ? <div ref={loadMoreRef} className="mt-6 h-4 w-full" aria-hidden /> : null}

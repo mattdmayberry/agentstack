@@ -12,7 +12,7 @@ export function getStoredArticles(): Article[] {
 
   try {
     const parsed = JSON.parse(raw) as Article[]
-    if (!Array.isArray(parsed)) {
+    if (!Array.isArray(parsed) || parsed.length === 0) {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(mockArticles))
       return mockArticles
     }

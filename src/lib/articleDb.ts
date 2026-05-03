@@ -82,9 +82,9 @@ export function rowToArticle(row: ArticleRow): Article {
   }
 }
 
-export async function fetchApprovedArticles(): Promise<Article[]> {
-  if (!supabase) return []
-  const { data, error } = await supabase
+async function fetchArticlesApprovedOrdered(): Promise<{ data: unknown[] | null; error: unknown }> {
+  if (!supabase) return { data: [], error: null }
+  const primary = await supabase
     .from('articles')
     .select('*')
     .eq('is_approved', true)
@@ -92,6 +92,24 @@ export async function fetchApprovedArticles(): Promise<Article[]> {
     .order('display_order', { ascending: true })
     .order('published_at', { ascending: false })
 
+  if (!primary.error) return primary
+
+  const err = primary.error as { code?: string; message?: string }
+  const msg = `${err.message ?? ''} ${err.code ?? ''}`.toLowerCase()
+  if (msg.includes('display_order') || err.code === '42703') {
+    return supabase
+      .from('articles')
+      .select('*')
+      .eq('is_approved', true)
+      .order('is_featured', { ascending: false })
+      .order('published_at', { ascending: false })
+  }
+  return primary
+}
+
+export async function fetchApprovedArticles(): Promise<Article[]> {
+  if (!supabase) return []
+  const { data, error } = await fetchArticlesApprovedOrdered()
   if (error) throw error
   return ((data ?? []) as ArticleRow[]).map(rowToArticle)
 }
@@ -112,13 +130,27 @@ export async function fetchArticleBySlug(slug: string): Promise<Article | null> 
 
 export async function fetchAllArticlesAdmin(): Promise<Article[]> {
   if (!supabase) return []
-  const { data, error } = await supabase
+  const primary = await supabase
     .from('articles')
     .select('*')
     .order('is_featured', { ascending: false })
     .order('display_order', { ascending: true })
     .order('published_at', { ascending: false })
 
+  let { data, error } = primary
+  if (error) {
+    const err = error as { code?: string; message?: string }
+    const msg = `${err.message ?? ''} ${err.code ?? ''}`.toLowerCase()
+    if (msg.includes('display_order') || err.code === '42703') {
+      const second = await supabase
+        .from('articles')
+        .select('*')
+        .order('is_featured', { ascending: false })
+        .order('published_at', { ascending: false })
+      data = second.data
+      error = second.error
+    }
+  }
   if (error) throw error
   return ((data ?? []) as ArticleRow[]).map(rowToArticle)
 }
