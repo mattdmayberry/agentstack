@@ -6,7 +6,6 @@
 #   LLM manifest (www): https://www.agentstack.fyi/llms.txt
 #   Static article index: https://agentstack.fyi/crawl/index.html
 #   Static about: https://agentstack.fyi/crawl/about.html
-#   Plain-text URL list (no HTML): https://agentstack.fyi/crawl/urls.txt
 
 User-agent: *
 Allow: /

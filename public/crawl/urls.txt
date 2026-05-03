@@ -1,9 +1,0 @@
-AgentStack.fyi — plain-text pointer file for HTTP clients that only return response body text (no HTML parsing).
-
-Use these URLs directly:
-
-https://agentstack.fyi/llms.txt
-https://agentstack.fyi/crawl/index.html
-https://agentstack.fyi/crawl/about.html
-
-The homepage https://agentstack.fyi/ is a JavaScript application; many tools only surface the page title from that URL. Fetch llms.txt or crawl/index.html instead for full readable content.
