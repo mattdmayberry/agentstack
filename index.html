@@ -28,10 +28,9 @@
   </head>
   <body>
     <!--
-      Plain div + paragraphs (not <header>): reader-mode / text extractors often drop <header> as chrome.
-      URLs repeated as link text and as raw text so stripping <a> still leaves discoverable strings.
+      <article> helps some extractors; /crawl/urls.txt is plain text for tools that only return body text.
     -->
-    <div
+    <article
       id="non-js-content-preamble"
       style="
         margin: 0;
@@ -44,6 +43,9 @@
         border-bottom: 1px solid #27272a;
       "
     >
+      <h2 style="margin: 0 0 10px 0; font-size: 15px; font-weight: 600">
+        Reading AgentStack.fyi without JavaScript (static HTML in this block; feed below needs JS)
+      </h2>
       <p style="margin: 0 0 10px 0">
         This site is AgentStack dot fyi, a publication about AI agent infrastructure including MCP,
         HTTP APIs, command-line tools, and production tooling for software builders. The article feed
@@ -72,7 +74,11 @@
         https://agentstack.fyi/crawl/index.html
         https://agentstack.fyi/crawl/about.html
       </p>
-    </div>
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #a1a1aa">
+        Same pointers as plain text (no HTML):
+        <a href="https://agentstack.fyi/crawl/urls.txt" style="color: #22d3ee">https://agentstack.fyi/crawl/urls.txt</a>
+      </p>
+    </article>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
