@@ -13,7 +13,8 @@
  *   export SYNC_CLEAR_LOCAL=1
  *   node scripts/sync-articles-from-remote.mjs
  *
- * Or add the same variable names to `.env` (this script loads `.env` when vars are unset).
+ * Or add the same variable names to `.env` (loaded first when vars are unset).
+ * Optional: `.env.sync` (gitignored like `.env`) is loaded second and overrides keys — handy for prod URL/anon only for this script.
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -24,8 +25,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.resolve(__dirname, '..')
 
-function loadDotEnv() {
-  const envPath = path.join(root, '.env')
+function loadDotEnvFile(envPath, overrideExisting) {
   if (!fs.existsSync(envPath)) return
   const text = fs.readFileSync(envPath, 'utf8')
   for (const line of text.split('\n')) {
@@ -41,10 +41,16 @@ function loadDotEnv() {
     ) {
       val = val.slice(1, -1)
     }
-    if (process.env[key] === undefined || process.env[key] === '') {
+    const empty = process.env[key] === undefined || process.env[key] === ''
+    if (overrideExisting || empty) {
       process.env[key] = val
     }
   }
+}
+
+function loadDotEnv() {
+  loadDotEnvFile(path.join(root, '.env'), false)
+  loadDotEnvFile(path.join(root, '.env.sync'), true)
 }
 
 function req(name) {
