@@ -2,6 +2,7 @@
  * Vercel Edge: full HTML document for an approved article (for crawlers that do not run JS).
  * Invoked from middleware for bot user-agents; humans still get the SPA.
  */
+import { articleOgImageUrl } from '../src/lib/ogImage'
 import { marked } from 'marked'
 
 export const config = { runtime: 'edge' }
@@ -110,10 +111,11 @@ export default async function handler(request: Request): Promise<Response> {
     }
   }
   const origin = new URL(canonical).origin
-  const ogImage =
-    row.thumbnail_url && String(row.thumbnail_url).trim().length > 0
-      ? String(row.thumbnail_url).trim()
-      : `${origin}/agent_stack_19fad7.png`
+  const ogImage = articleOgImageUrl(origin, {
+    title,
+    category: row.category,
+    thumbnailUrl: row.thumbnail_url,
+  })
 
   const orgId = `${origin}/#organization`
   const articleId = `${canonical}#article`

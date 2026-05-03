@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { useArticleThumbnail } from '../hooks/useArticleThumbnail'
 import { fetchArticleBySlug } from '../lib/articleDb'
+import { articleOgImageUrl } from '../lib/ogImage'
 import { getPublicSiteOrigin } from '../lib/siteUrl'
 import { getStoredArticles } from '../lib/articleStore'
 import { supabase } from '../lib/supabase'
@@ -93,9 +94,7 @@ export function ArticlePage() {
     const origin = getPublicSiteOrigin()
     const canonicalHref = `${origin}${article.url.startsWith('/') ? article.url : `/${article.url}`}`
     const description = article.summary?.trim() || `Read ${article.title} on AgentStack.fyi.`
-    const ogImage = article.thumbnailUrl?.trim()
-      ? article.thumbnailUrl
-      : `${origin}/agent_stack_19fad7.png`
+    const ogImage = articleOgImageUrl(origin || '', article)
 
     document.title = `${article.title} — AgentStack.fyi`
     setCanonical(canonicalHref)

@@ -3,6 +3,7 @@ import { FeedCard } from '../components/FeedCard'
 import { NewsletterForm } from '../components/NewsletterForm'
 import { SiteHeader } from '../components/SiteHeader'
 import { compareArticlesFeedOrder, fetchApprovedArticles } from '../lib/articleDb'
+import { defaultSiteOgImageUrl } from '../lib/ogImage'
 import { getPublicSiteOrigin } from '../lib/siteUrl'
 import { getStoredArticles } from '../lib/articleStore'
 import { supabase } from '../lib/supabase'
@@ -101,7 +102,7 @@ export function HomePage() {
       'Track MCP, APIs, and agent infrastructure updates without the noise. High-signal coverage for builders.'
     const origin = getPublicSiteOrigin()
     const canonicalHref = `${origin}/`
-    const ogImage = `${origin}/agent_stack_19fad7.png`
+    const ogImage = defaultSiteOgImageUrl(origin || undefined)
 
     const setMeta = (attr: 'name' | 'property', key: string, value: string) => {
       let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null

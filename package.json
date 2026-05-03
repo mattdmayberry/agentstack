@@ -15,6 +15,7 @@
     "sync:articles-from-remote": "node scripts/sync-articles-from-remote.mjs"
   },
   "dependencies": {
+    "@vercel/og": "^0.6.8",
     "@supabase/supabase-js": "^2.103.0",
     "marked": "^18.0.3",
     "react": "^18.3.1",

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { HtmlTagDescriptor } from 'vite'
 import type { Article } from '../src/types'
 import { getArticleThumbnailCandidates } from '../src/lib/articleThumbnails'
+import { defaultSiteOgImageUrl } from '../src/lib/ogImage'
 
 const CATEGORIES = ['MCP', 'API', 'Infra', 'Tooling', 'Opinion'] as const
 
@@ -214,7 +215,7 @@ function buildHomeJsonLd(origin: string | null, listArticles: Article[]): string
 function buildHomeHeadTags(origin: string | null, jsonLdRaw: string): HtmlTagDescriptor[] {
   const safeJsonLd = jsonLdRaw.replace(/</g, '\\u003c')
   const canonicalHref = origin ? `${origin}/` : '/'
-  const ogImage = origin ? `${origin}/agent_stack_19fad7.png` : '/agent_stack_19fad7.png'
+  const ogImage = defaultSiteOgImageUrl(origin)
 
   const tags: HtmlTagDescriptor[] = [
     { tag: 'link', attrs: { rel: 'canonical', href: canonicalHref }, injectTo: 'head' },
