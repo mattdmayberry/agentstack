@@ -27,6 +27,34 @@
     />
   </head>
   <body>
+    <!-- Visible in the HTML body for fetchers that only extract text (not <head> or HTTP headers). -->
+    <header
+      id="readable-static-entry"
+      style="
+        margin: 0;
+        padding: 10px 14px;
+        background: #18181b;
+        color: #e4e4e7;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+        border-bottom: 1px solid #27272a;
+      "
+    >
+      <p style="margin: 0 0 6px 0">
+        <strong>AgentStack.fyi</strong> — Curated AI agent infrastructure news: MCP, APIs, CLIs,
+        tooling, and analysis for builders. (This paragraph is static HTML; the feed below loads with
+        JavaScript.)
+      </p>
+      <p style="margin: 0">
+        Read without JavaScript:
+        <a href="https://agentstack.fyi/llms.txt" style="color: #22d3ee">llms.txt (plain text)</a>
+        ·
+        <a href="https://agentstack.fyi/crawl/index.html" style="color: #22d3ee">crawl index (HTML)</a>
+        ·
+        <a href="https://agentstack.fyi/crawl/about.html" style="color: #22d3ee">about (HTML)</a>
+      </p>
+    </header>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
