@@ -1,12 +1,17 @@
 import type { Article } from '../types'
-import agentAutonomyThumb from '../assets/article-thumbs/agent-autonomy.jpg'
-import agentStackThumb from '../assets/article-thumbs/agent-stack.jpg'
-import agenticUiThumb from '../assets/article-thumbs/agentic-ui.jpg'
-import cliMcpThumb from '../assets/article-thumbs/cli-mcp.jpg'
-import cliWorkflowsThumb from '../assets/article-thumbs/cli-workflows.jpg'
-import functionCallingThumb from '../assets/article-thumbs/function-calling.jpg'
-import mcpProtocolThumb from '../assets/article-thumbs/mcp-protocol.jpg'
-import mcpRegistryThumb from '../assets/article-thumbs/mcp-registry.jpg'
+
+/**
+ * Stable URLs (served from `public/article-thumbs/`). Used by the client and by
+ * Vite’s build-time homepage prerender — avoids importing `.jpg` into the config bundle.
+ */
+const agentAutonomyThumb = '/article-thumbs/agent-autonomy.jpg'
+const agentStackThumb = '/article-thumbs/agent-stack.jpg'
+const agenticUiThumb = '/article-thumbs/agentic-ui.jpg'
+const cliMcpThumb = '/article-thumbs/cli-mcp.jpg'
+const cliWorkflowsThumb = '/article-thumbs/cli-workflows.jpg'
+const functionCallingThumb = '/article-thumbs/function-calling.jpg'
+const mcpProtocolThumb = '/article-thumbs/mcp-protocol.jpg'
+const mcpRegistryThumb = '/article-thumbs/mcp-registry.jpg'
 
 const FALLBACK_POOL = [
   agentAutonomyThumb,

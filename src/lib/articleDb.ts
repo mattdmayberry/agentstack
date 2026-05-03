@@ -74,6 +74,7 @@ export function rowToArticle(row: ArticleRow): Article {
     summary: row.summary,
     category,
     publishedAt: row.published_at,
+    updatedAt: row.updated_at,
     createdAt: row.created_at,
     isApproved: row.is_approved,
     isFeatured: row.is_featured,

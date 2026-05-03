@@ -5,6 +5,7 @@ import { Link, useParams } from 'react-router-dom'
 import { SiteHeader } from '../components/SiteHeader'
 import { useArticleThumbnail } from '../hooks/useArticleThumbnail'
 import { fetchArticleBySlug } from '../lib/articleDb'
+import { getPublicSiteOrigin } from '../lib/siteUrl'
 import { getStoredArticles } from '../lib/articleStore'
 import { supabase } from '../lib/supabase'
 import type { Article } from '../types'
@@ -89,11 +90,12 @@ export function ArticlePage() {
       return
     }
 
-    const canonicalHref = `${window.location.origin}${article.url}`
+    const origin = getPublicSiteOrigin()
+    const canonicalHref = `${origin}${article.url.startsWith('/') ? article.url : `/${article.url}`}`
     const description = article.summary?.trim() || `Read ${article.title} on AgentStack.fyi.`
     const ogImage = article.thumbnailUrl?.trim()
       ? article.thumbnailUrl
-      : `${window.location.origin}/agent_stack_19fad7.png`
+      : `${origin}/agent_stack_19fad7.png`
 
     document.title = `${article.title} — AgentStack.fyi`
     setCanonical(canonicalHref)
@@ -106,6 +108,11 @@ export function ArticlePage() {
     setMeta('property', 'og:url', canonicalHref)
     setMeta('property', 'og:image', ogImage)
     setMeta('property', 'article:published_time', article.publishedAt)
+    setMeta('property', 'article:modified_time', article.updatedAt ?? article.publishedAt)
+    if (article.category) {
+      setMeta('property', 'article:section', article.category)
+    }
+    setMeta('property', 'og:locale', 'en_US')
     setMeta('name', 'twitter:card', 'summary_large_image')
     setMeta('name', 'twitter:title', article.title)
     setMeta('name', 'twitter:description', description)
@@ -122,14 +129,14 @@ export function ArticlePage() {
       description,
       image: [ogImage],
       datePublished: article.publishedAt,
-      dateModified: article.publishedAt,
+      dateModified: article.updatedAt ?? article.publishedAt,
       mainEntityOfPage: canonicalHref,
       publisher: {
         '@type': 'Organization',
         name: siteTitle,
         logo: {
           '@type': 'ImageObject',
-          url: `${window.location.origin}/agent_stack_favicon_iso_19fad7_square.png`,
+          url: `${getPublicSiteOrigin()}/agent_stack_favicon_iso_19fad7_square.png`,
         },
       },
       author: {

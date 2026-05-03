@@ -3,6 +3,7 @@ import { FeedCard } from '../components/FeedCard'
 import { NewsletterForm } from '../components/NewsletterForm'
 import { SiteHeader } from '../components/SiteHeader'
 import { compareArticlesFeedOrder, fetchApprovedArticles } from '../lib/articleDb'
+import { getPublicSiteOrigin } from '../lib/siteUrl'
 import { getStoredArticles } from '../lib/articleStore'
 import { supabase } from '../lib/supabase'
 import type { Article } from '../types'
@@ -98,8 +99,9 @@ export function HomePage() {
     const title = 'AgentStack.fyi — AI Agent Infrastructure News'
     const description =
       'Track MCP, APIs, and agent infrastructure updates without the noise. High-signal coverage for builders.'
-    const canonicalHref = `${window.location.origin}/`
-    const ogImage = `${window.location.origin}/agent_stack_19fad7.png`
+    const origin = getPublicSiteOrigin()
+    const canonicalHref = `${origin}/`
+    const ogImage = `${origin}/agent_stack_19fad7.png`
 
     const setMeta = (attr: 'name' | 'property', key: string, value: string) => {
       let el = document.head.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null
@@ -130,6 +132,7 @@ export function HomePage() {
     setMeta('property', 'og:description', description)
     setMeta('property', 'og:url', canonicalHref)
     setMeta('property', 'og:image', ogImage)
+    setMeta('property', 'og:locale', 'en_US')
     setMeta('name', 'twitter:card', 'summary_large_image')
     setMeta('name', 'twitter:title', title)
     setMeta('name', 'twitter:description', description)

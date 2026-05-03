@@ -2,6 +2,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
+import { buildHomePrerenderBundle } from './vite/homePrerender'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
@@ -16,7 +17,7 @@ function localEdgeTextRoutesPlugin(mode: string) {
     configureServer(server: import('vite').ViteDevServer) {
       server.middlewares.use(async (req, res, next) => {
         const pathname = req.url?.split('?')[0]
-        if (pathname !== '/sitemap.xml' && pathname !== '/llms.txt') {
+        if (pathname !== '/sitemap.xml' && pathname !== '/llms.txt' && pathname !== '/rss.xml') {
           next()
           return
         }
@@ -30,7 +31,12 @@ function localEdgeTextRoutesPlugin(mode: string) {
           if (v) process.env[key] = v
         }
 
-        const modulePath = pathname === '/sitemap.xml' ? '/api/sitemap.ts' : '/api/llms.ts'
+        const modulePath =
+          pathname === '/sitemap.xml'
+            ? '/api/sitemap.ts'
+            : pathname === '/rss.xml'
+              ? '/api/rss.ts'
+              : '/api/llms.ts'
 
         try {
           const mod = (await server.ssrLoadModule(modulePath)) as {
@@ -60,9 +66,25 @@ function localEdgeTextRoutesPlugin(mode: string) {
   }
 }
 
+function homePrerenderPlugin(mode: string, command: string) {
+  return {
+    name: 'inject-home-prerender',
+    transformIndexHtml: {
+      order: 'pre' as const,
+      async handler(html: string) {
+        if (command !== 'build') return html
+        const env = loadEnv(mode, rootDir, '')
+        const { rootInnerHtml, headTags } = await buildHomePrerenderBundle(env)
+        const nextHtml = html.replace('<div id="root"></div>', `<div id="root">${rootInnerHtml}</div>`)
+        return { html: nextHtml, tags: headTags }
+      },
+    },
+  }
+}
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  plugins: [localEdgeTextRoutesPlugin(mode), react()],
+export default defineConfig(({ mode, command }) => ({
+  plugins: [localEdgeTextRoutesPlugin(mode), react(), homePrerenderPlugin(mode, command)],
   server: {
     port: 8080,
   },

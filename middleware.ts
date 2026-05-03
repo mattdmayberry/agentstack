@@ -9,7 +9,7 @@ export const config = {
 }
 
 const BOT_UA =
-  /googlebot|bingbot|yandex|baiduspider|duckduckbot|facebot|facebookexternalhit|linkedinbot|twitterbot|slackbot|discordbot|telegram|applebot|gptbot|chatgpt-user|anthropic|claude-web|perplexitybot|bytespider|amazonbot|ia_archiver|semrushbot|ahrefsbot/i
+  /googlebot|bingbot|yandex|baiduspider|duckduckbot|facebot|facebookexternalhit|linkedinbot|twitterbot|slackbot|discordbot|telegram|applebot|gptbot|chatgpt-user|anthropic|claude-web|claudebot|cohere-ai|ccbot|omgili|perplexitybot|bytespider|amazonbot|ia_archiver|semrushbot|ahrefsbot|mj12bot|dotbot/i
 
 export default async function middleware(request: Request): Promise<Response | undefined> {
   const url = new URL(request.url)

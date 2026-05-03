@@ -3,8 +3,13 @@
 
 User-agent: *
 Allow: /
+Allow: /article/
 
 # If you add a public API surface, tighten this line.
 Disallow: /api/
 
 Sitemap: https://agentstack.fyi/sitemap.xml
+Sitemap: https://www.agentstack.fyi/sitemap.xml
+# RSS (also discoverable via <link rel="alternate"> on the built homepage when configured)
+# https://agentstack.fyi/rss.xml
+# https://www.agentstack.fyi/rss.xml

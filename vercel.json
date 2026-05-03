@@ -2,6 +2,7 @@
   "installCommand": "npm ci",
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/rss.xml", "destination": "/api/rss" },
     { "source": "/llms.txt", "destination": "/api/llms" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]

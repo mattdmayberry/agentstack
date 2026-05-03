@@ -1,9 +1,10 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { AdminHostGate } from './components/AdminHostGate'
 import { canAccessAdmin, getAdminRoutePath } from './lib/adminAccess'
 import { AdminPage } from './pages/AdminPage'
 import { ArticlePage } from './pages/ArticlePage'
 import { HomePage } from './pages/HomePage'
+import { NotFoundPage } from './pages/NotFoundPage'
 
 function App() {
   const adminAllowed = canAccessAdmin(window.location.hostname)
@@ -17,7 +18,7 @@ function App() {
         path={adminPath}
         element={adminAllowed ? <AdminPage /> : <AdminHostGate />}
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
