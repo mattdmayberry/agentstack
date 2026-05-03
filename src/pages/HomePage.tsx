@@ -10,11 +10,17 @@ import type { Article } from '../types'
 /** Articles shown initially and per “Load more” (grid is up to 3 columns on xl). */
 const PAGE_SIZE = 9
 
+function devMockFeedWhenEmptyEnabled(): boolean {
+  const v = import.meta.env.VITE_DEV_MOCK_FEED_WHEN_EMPTY
+  return v === '1' || String(v).toLowerCase() === 'true'
+}
+
 export function HomePage() {
   const [page, setPage] = useState(1)
   const [articles, setArticles] = useState<Article[]>([])
   const [feedError, setFeedError] = useState('')
   const [feedReady, setFeedReady] = useState(false)
+  const [devMockFeed, setDevMockFeed] = useState(false)
   const [activeCategory, setActiveCategory] = useState<'All' | 'MCP' | 'API' | 'Infra' | 'Tooling' | 'Opinion'>('All')
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
@@ -25,18 +31,30 @@ export function HomePage() {
         if (supabase) {
           const list = await fetchApprovedArticles()
           if (!cancelled) {
-            setArticles(list)
+            const useMocks =
+              import.meta.env.DEV &&
+              devMockFeedWhenEmptyEnabled() &&
+              list.length === 0
+            if (useMocks) {
+              setArticles(getStoredArticles().filter((a) => a.isApproved))
+              setDevMockFeed(true)
+            } else {
+              setArticles(list)
+              setDevMockFeed(false)
+            }
           }
         } else {
           const list = getStoredArticles().filter((a) => a.isApproved)
           if (!cancelled) {
             setArticles(list)
+            setDevMockFeed(false)
           }
         }
       } catch (e) {
         if (!cancelled) {
           setFeedError(e instanceof Error ? e.message : 'Could not load articles')
           setArticles([])
+          setDevMockFeed(false)
         }
       } finally {
         if (!cancelled) {
@@ -140,6 +158,13 @@ export function HomePage() {
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
       <SiteHeader />
+      {devMockFeed ? (
+        <div className="border-b border-amber-700/40 bg-amber-950/50 px-3 py-2 text-center text-xs text-amber-200 sm:text-sm">
+          Dev: showing built-in mock articles — Supabase returned zero approved rows. Set{' '}
+          <code className="rounded bg-zinc-900 px-1 text-amber-100">VITE_DEV_MOCK_FEED_WHEN_EMPTY=0</code> to hide
+          this, or load real data (see <code className="text-zinc-400">.env.example</code>).
+        </div>
+      ) : null}
       <section className="mx-auto max-w-6xl px-3 py-8 sm:px-4 sm:py-10 md:py-14">
         <div className="relative mb-8 overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-cyan-950/30 p-4 sm:p-6 md:p-8">
           <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-cyan-500/15 blur-3xl" />
@@ -263,6 +288,11 @@ export function HomePage() {
                   <li>
                     Nothing is <code className="text-zinc-500">is_approved</code> yet — use the admin panel to approve
                     rows.
+                  </li>
+                  <li>
+                    Quick UI only (dev server): add{' '}
+                    <code className="text-cyan-400">VITE_DEV_MOCK_FEED_WHEN_EMPTY=1</code> to <code className="text-zinc-500">.env</code>, restart{' '}
+                    <code className="text-zinc-500">npm run dev</code> — shows mock cards; not for production builds.
                   </li>
                 </ul>
               </div>
