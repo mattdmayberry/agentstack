@@ -13,12 +13,14 @@ const PREAMBLE = `# AgentStack.fyi
 
 > High-signal news and analysis on the AI agent stack: MCP, APIs, CLIs, orchestration, and production agent infrastructure.
 
+**No-JS entry point (use this first with plain HTTP fetch):** \`/crawl/index.html\` — static HTML listing every approved article with links to full static article pages at \`/crawl/article/{slug}.html\`.
+
 AgentStack.fyi is a curated publication for builders tracking how software is shifting from traditional APIs and UIs toward agent-driven systems.
 
 ## What you will find
 
-- A homepage feed of approved articles with summaries, categories, and links to deeper analysis on-site.
-- Long-form analysis pages at \`/article/{slug}\` with editorial commentary (Markdown).
+- A homepage feed of approved articles with summaries, categories, and links to deeper analysis on-site (interactive app at \`/\`).
+- Long-form analysis pages at \`/article/{slug}\` with editorial commentary (Markdown) when JavaScript runs.
 
 ## Primary audience
 

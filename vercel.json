@@ -13,6 +13,9 @@
     { "source": "/rss.xml", "destination": "/api/rss" },
     { "source": "/llms.txt", "destination": "/api/llms" },
     { "source": "/", "destination": "/index.html" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/|crawl/|assets/).*)",
+      "destination": "/index.html"
+    }
   ]
 }
