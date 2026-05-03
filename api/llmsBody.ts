@@ -16,7 +16,7 @@ START HERE (static HTML, works with curl and dumb HTTP clients):
 - About / what this site is (static HTML): /crawl/about.html
 - Full text of each article (static HTML): /crawl/article/{slug}.html
 
-This /llms.txt file is written to disk at deploy time (and mirrored by /api/llms for local dev). It is not a client-rendered app.
+This /llms.txt file is written to disk at deploy time (and mirrored by /api/llms for local dev). It is not a client-rendered app. The same body is available at /.well-known/llms.txt (HTTP redirect to this path) for clients that probe well-known URLs.
 
 # AgentStack.fyi
 

@@ -28,6 +28,20 @@ export default async function handler(request: Request): Promise<Response> {
     `  <url><loc>${xmlEscape(`${origin}/`)}</loc><changefreq>daily</changefreq><priority>1.0</priority><lastmod>${xmlEscape(today)}</lastmod></url>`,
   )
 
+  const staticPages: [string, string][] = [
+    [`${origin}/llms.txt`, '0.95'],
+    [`${origin}/.well-known/llms.txt`, '0.95'],
+    [`${origin}/crawl/index.html`, '0.9'],
+    [`${origin}/crawl/about.html`, '0.75'],
+    [`${origin}/crawl/urls.txt`, '0.9'],
+    [`${origin}/rss.xml`, '0.65'],
+  ]
+  for (const [loc, priority] of staticPages) {
+    entries.push(
+      `  <url><loc>${xmlEscape(loc)}</loc><changefreq>daily</changefreq><priority>${priority}</priority><lastmod>${xmlEscape(today)}</lastmod></url>`,
+    )
+  }
+
   if (supabaseUrl && anon) {
     const restUrl = `${supabaseUrl}/rest/v1/articles?select=slug,updated_at&is_approved=eq.true&limit=5000`
     const res = await fetch(restUrl, {
@@ -51,6 +65,10 @@ export default async function handler(request: Request): Promise<Response> {
               : today
           entries.push(
             `  <url><loc>${xmlEscape(loc)}</loc><lastmod>${xmlEscape(lm)}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+          )
+          const crawlLoc = `${origin}/crawl/article/${encodeURIComponent(slug)}.html`
+          entries.push(
+            `  <url><loc>${xmlEscape(crawlLoc)}</loc><lastmod>${xmlEscape(lm)}</lastmod><changefreq>weekly</changefreq><priority>0.75</priority></url>`,
           )
         }
       }
