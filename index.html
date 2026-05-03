@@ -27,34 +27,52 @@
     />
   </head>
   <body>
-    <!-- Visible in the HTML body for fetchers that only extract text (not <head> or HTTP headers). -->
-    <header
-      id="readable-static-entry"
+    <!--
+      Plain div + paragraphs (not <header>): reader-mode / text extractors often drop <header> as chrome.
+      URLs repeated as link text and as raw text so stripping <a> still leaves discoverable strings.
+    -->
+    <div
+      id="non-js-content-preamble"
       style="
         margin: 0;
-        padding: 10px 14px;
+        padding: 12px 14px;
         background: #18181b;
         color: #e4e4e7;
         font-family: system-ui, -apple-system, sans-serif;
-        font-size: 13px;
-        line-height: 1.5;
+        font-size: 14px;
+        line-height: 1.55;
         border-bottom: 1px solid #27272a;
       "
     >
+      <p style="margin: 0 0 10px 0">
+        This site is AgentStack dot fyi, a publication about AI agent infrastructure including MCP,
+        HTTP APIs, command-line tools, and production tooling for software builders. The article feed
+        below is rendered by a JavaScript application. If your client does not run JavaScript, use the
+        plain-text and static HTML URLs in the next paragraphs instead of relying on this page body.
+      </p>
       <p style="margin: 0 0 6px 0">
-        <strong>AgentStack.fyi</strong> — Curated AI agent infrastructure news: MCP, APIs, CLIs,
-        tooling, and analysis for builders. (This paragraph is static HTML; the feed below loads with
-        JavaScript.)
+        Plain-text site manifest for scripts and language models:
+        <a href="https://agentstack.fyi/llms.txt" style="color: #22d3ee">https://agentstack.fyi/llms.txt</a>
       </p>
-      <p style="margin: 0">
-        Read without JavaScript:
-        <a href="https://agentstack.fyi/llms.txt" style="color: #22d3ee">llms.txt (plain text)</a>
-        ·
-        <a href="https://agentstack.fyi/crawl/index.html" style="color: #22d3ee">crawl index (HTML)</a>
-        ·
-        <a href="https://agentstack.fyi/crawl/about.html" style="color: #22d3ee">about (HTML)</a>
+      <p style="margin: 0 0 6px 0">
+        Static HTML index of every article without JavaScript:
+        <a href="https://agentstack.fyi/crawl/index.html" style="color: #22d3ee"
+          >https://agentstack.fyi/crawl/index.html</a
+        >
       </p>
-    </header>
+      <p style="margin: 0 0 8px 0">
+        Static HTML about page without JavaScript:
+        <a href="https://agentstack.fyi/crawl/about.html" style="color: #22d3ee"
+          >https://agentstack.fyi/crawl/about.html</a
+        >
+      </p>
+      <p style="margin: 0; font-size: 13px; color: #a1a1aa; word-break: break-all">
+        Copy-paste URLs:
+        https://agentstack.fyi/llms.txt
+        https://agentstack.fyi/crawl/index.html
+        https://agentstack.fyi/crawl/about.html
+      </p>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
