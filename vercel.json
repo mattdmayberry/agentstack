@@ -1,5 +1,16 @@
 {
   "installCommand": "npm ci",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Link",
+          "value": "</llms.txt>; rel=\"llms\", </crawl/index.html>; rel=\"alternate\"; type=\"text/html\"; title=\"Static crawl index\""
+        }
+      ]
+    }
+  ],
   "redirects": [
     {
       "source": "/:path*",

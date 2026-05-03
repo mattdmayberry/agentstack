@@ -1,5 +1,11 @@
 # https://agentstack.fyi — allow indexing of public pages (CSR shell + client routing).
 # Admin UI is gated by hostname; still avoid listing unknown admin paths here.
+#
+# Discoverability for LLMs / fetchers (plain text + static HTML, no JS):
+#   LLM manifest: https://agentstack.fyi/llms.txt
+#   LLM manifest (www): https://www.agentstack.fyi/llms.txt
+#   Static article index: https://agentstack.fyi/crawl/index.html
+#   Static about: https://agentstack.fyi/crawl/about.html
 
 User-agent: *
 Allow: /
