@@ -11,10 +11,9 @@
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/rss.xml", "destination": "/api/rss" },
-    { "source": "/llms.txt", "destination": "/api/llms" },
     { "source": "/", "destination": "/index.html" },
     {
-      "source": "/((?!api/|crawl/|assets/).*)",
+      "source": "/((?!api/|crawl/|assets/)(?!llms\\.txt$)(?!robots\\.txt$).*)",
       "destination": "/index.html"
     }
   ]

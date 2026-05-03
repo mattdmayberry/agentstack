@@ -1,6 +1,6 @@
 /**
- * Vercel Edge: dynamic llms.txt from approved articles in Supabase.
- * Rewritten from /llms.txt via vercel.json.
+ * Vercel Edge: dynamic llms.txt (optional). Production serves a static `llms.txt` from the build output;
+ * this handler remains for `vite dev` middleware and direct `/api/llms` requests.
  */
 import { buildLlmsText, type LlmsArticleInput } from './llmsBody.js'
 

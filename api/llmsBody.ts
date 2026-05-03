@@ -9,11 +9,20 @@ export type LlmsArticleInput = {
   category?: string
 }
 
-const PREAMBLE = `# AgentStack.fyi
+const PREAMBLE = `AgentStack.fyi — file for LLMs and automated fetchers (plain text; no JavaScript; no login)
+
+START HERE (static HTML, works with curl and dumb HTTP clients):
+- Crawl index listing all articles: append your site origin + /crawl/index.html  (example: https://agentstack.fyi/crawl/index.html)
+- About / what this site is (static HTML): /crawl/about.html
+- Full text of each article (static HTML): /crawl/article/{slug}.html
+
+This /llms.txt file is written to disk at deploy time (and mirrored by /api/llms for local dev). It is not a client-rendered app.
+
+# AgentStack.fyi
 
 > High-signal news and analysis on the AI agent stack: MCP, APIs, CLIs, orchestration, and production agent infrastructure.
 
-**No-JS entry point (use this first with plain HTTP fetch):** \`/crawl/index.html\` — static HTML listing every approved article with links to full static article pages at \`/crawl/article/{slug}.html\`.
+**Primary no-JS entry:** \`/crawl/index.html\` — lists every approved article with links to full static pages at \`/crawl/article/{slug}.html\`.
 
 AgentStack.fyi is a curated publication for builders tracking how software is shifting from traditional APIs and UIs toward agent-driven systems.
 
@@ -35,7 +44,9 @@ AgentStack.fyi is a curated publication for builders tracking how software is sh
 
 ## Technical note for crawlers and agents
 
-The homepage is a client-rendered React app. This file is generated from the database and lists every **approved** article below (it updates when you publish or approve content — no separate file to edit). Use \`/sitemap.xml\` for URL-only discovery.
+The public homepage (\`/\`) is a client-rendered React shell, but **you do not need to run JavaScript** to read our content: use \`/crawl/index.html\`, \`/crawl/about.html\`, and \`/crawl/article/{slug}.html\` instead.
+
+This file lists every **approved** article below (embedded at deploy from our database). For URL-only discovery see \`/sitemap.xml\`. For RSS see \`/rss.xml\`.
 
 For **plain HTML without JavaScript** (recommended for automated fetchers and LLMs), each article has a **static snapshot** rebuilt on every deploy:
 
