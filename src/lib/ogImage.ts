@@ -18,8 +18,9 @@ export function defaultSiteOgImageUrl(origin: string | null | undefined): string
 }
 
 /**
- * Per-article `og:image`: use remote or absolute thumbnail when present; otherwise
- * dynamic Edge image at `/api/og`.
+ * Per-article `og:image`: use remote or absolute thumbnail when present; otherwise the
+ * branded default (`/og-default.png`). Dynamic `@vercel/og` routes are omitted here
+ * because that package is not reliably deployable on Vercel Edge outside Next.js.
  */
 export function articleOgImageUrl(
   origin: string,
@@ -35,10 +36,5 @@ export function articleOgImageUrl(
     if (thumb.startsWith('/')) return withAbsoluteOrigin(origin, thumb)
     return thumb
   }
-  const base = origin.replace(/\/$/, '')
-  const title = article.title.slice(0, 120).trim() || 'AgentStack.fyi'
-  const params = new URLSearchParams({ title })
-  const cat = article.category?.trim()
-  if (cat) params.set('category', cat.slice(0, 32))
-  return `${base}/api/og?${params.toString()}`
+  return defaultSiteOgImageUrl(origin || undefined)
 }

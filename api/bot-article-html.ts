@@ -2,7 +2,7 @@
  * Vercel Edge: full HTML document for an approved article (for crawlers that do not run JS).
  * Invoked from middleware for bot user-agents; humans still get the SPA.
  */
-import { articleOgImageUrl } from '../src/lib/ogImage'
+import { articleOgImageUrl } from '../src/lib/ogImage.js'
 import { marked } from 'marked'
 
 export const config = { runtime: 'edge' }

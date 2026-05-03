@@ -2,7 +2,7 @@
  * Vercel Edge: dynamic llms.txt from approved articles in Supabase.
  * Rewritten from /llms.txt via vercel.json.
  */
-import { buildLlmsText, type LlmsArticleInput } from './llmsBody'
+import { buildLlmsText, type LlmsArticleInput } from './llmsBody.js'
 
 export const config = { runtime: 'edge' }
 
