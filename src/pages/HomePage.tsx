@@ -10,8 +10,9 @@ import type { Article } from '../types'
 /** Articles shown initially and per “Load more” (grid is up to 3 columns on xl). */
 const PAGE_SIZE = 9
 
-function devMockFeedWhenEmptyEnabled(): boolean {
-  const v = import.meta.env.VITE_DEV_MOCK_FEED_WHEN_EMPTY
+/** When true (dev only), do not auto-fill mocks — show the empty-state diagnostics. */
+function devStrictEmptyFeed(): boolean {
+  const v = import.meta.env.VITE_DEV_STRICT_EMPTY_FEED
   return v === '1' || String(v).toLowerCase() === 'true'
 }
 
@@ -31,10 +32,7 @@ export function HomePage() {
         if (supabase) {
           const list = await fetchApprovedArticles()
           if (!cancelled) {
-            const useMocks =
-              import.meta.env.DEV &&
-              devMockFeedWhenEmptyEnabled() &&
-              list.length === 0
+            const useMocks = import.meta.env.DEV && !devStrictEmptyFeed() && list.length === 0
             if (useMocks) {
               setArticles(getStoredArticles().filter((a) => a.isApproved))
               setDevMockFeed(true)
@@ -160,9 +158,10 @@ export function HomePage() {
       <SiteHeader />
       {devMockFeed ? (
         <div className="border-b border-amber-700/40 bg-amber-950/50 px-3 py-2 text-center text-xs text-amber-200 sm:text-sm">
-          Dev: showing built-in mock articles — Supabase returned zero approved rows. Set{' '}
-          <code className="rounded bg-zinc-900 px-1 text-amber-100">VITE_DEV_MOCK_FEED_WHEN_EMPTY=0</code> to hide
-          this, or load real data (see <code className="text-zinc-400">.env.example</code>).
+          Dev: sample articles — Supabase returned no approved rows. Load real data (see{' '}
+          <code className="text-zinc-400">.env.example</code>) or set{' '}
+          <code className="rounded bg-zinc-900 px-1 text-amber-100">VITE_DEV_STRICT_EMPTY_FEED=1</code> to show the
+          empty-state checklist instead.
         </div>
       ) : null}
       <section className="mx-auto max-w-6xl px-3 py-8 sm:px-4 sm:py-10 md:py-14">
@@ -290,9 +289,9 @@ export function HomePage() {
                     rows.
                   </li>
                   <li>
-                    Quick UI only (dev server): add{' '}
-                    <code className="text-cyan-400">VITE_DEV_MOCK_FEED_WHEN_EMPTY=1</code> to <code className="text-zinc-500">.env</code>, restart{' '}
-                    <code className="text-zinc-500">npm run dev</code> — shows mock cards; not for production builds.
+                    In dev, sample cards load automatically when the list is empty. To force this screen instead, set{' '}
+                    <code className="text-cyan-400">VITE_DEV_STRICT_EMPTY_FEED=1</code> in <code className="text-zinc-500">.env</code> and restart{' '}
+                    <code className="text-zinc-500">npm run dev</code>.
                   </li>
                 </ul>
               </div>
