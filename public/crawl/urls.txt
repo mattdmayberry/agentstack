@@ -3,7 +3,6 @@ AgentStack.fyi — plain-text pointer file for HTTP clients that only return res
 Use these URLs directly:
 
 https://agentstack.fyi/llms.txt
-https://agentstack.fyi/.well-known/llms.txt
 https://agentstack.fyi/crawl/index.html
 https://agentstack.fyi/crawl/about.html
 

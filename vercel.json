@@ -6,17 +6,12 @@
       "headers": [
         {
           "key": "Link",
-          "value": "</llms.txt>; rel=\"llms\", </.well-known/llms.txt>; rel=\"llms\", </crawl/index.html>; rel=\"alternate\"; type=\"text/html\"; title=\"Static crawl index\", </crawl/urls.txt>; rel=\"alternate\"; type=\"text/plain\"; title=\"Crawl URL list\""
+          "value": "</llms.txt>; rel=\"llms\", </crawl/index.html>; rel=\"alternate\"; type=\"text/html\"; title=\"Static crawl index\""
         }
       ]
     }
   ],
   "redirects": [
-    {
-      "source": "/.well-known/llms.txt",
-      "destination": "/llms.txt",
-      "permanent": true
-    },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "www.agentstack.fyi" }],
@@ -29,7 +24,7 @@
     { "source": "/rss.xml", "destination": "/api/rss" },
     { "source": "/", "destination": "/index.html" },
     {
-      "source": "/((?!api/|crawl/|assets/|\\.well-known/)(?!llms\\.txt$)(?!robots\\.txt$).*)",
+      "source": "/((?!api/|crawl/|assets/)(?!llms\\.txt$)(?!robots\\.txt$).*)",
       "destination": "/index.html"
     }
   ]

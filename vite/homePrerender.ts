@@ -7,9 +7,7 @@ import { defaultSiteOgImageUrl } from '../src/lib/ogImage'
 const CATEGORIES = ['MCP', 'API', 'Infra', 'Tooling', 'Opinion'] as const
 
 const SITE_NAME = 'AgentStack.fyi'
-/** Shown in &lt;title&gt;, og:title, twitter:title — many fetchers only surface the document title. */
-const HOME_TITLE =
-  `${SITE_NAME} — AI agent infrastructure news · No-JS manifest https://agentstack.fyi/llms.txt · static index https://agentstack.fyi/crawl/index.html · URL list https://agentstack.fyi/crawl/urls.txt · well-known https://agentstack.fyi/.well-known/llms.txt`
+const HOME_TITLE = `${SITE_NAME} — AI Agent Infrastructure News`
 const HOME_DESCRIPTION =
   'Track MCP, APIs, and agent infrastructure updates without the noise. High-signal coverage for builders — AgentStack.fyi.'
 
@@ -158,11 +156,6 @@ function renderArticleCard(origin: string | null, article: Article, featured: bo
 </article>`
 }
 
-function crawlAssetUrl(origin: string | null, path: string): string {
-  const p = path.startsWith('/') ? path : `/${path}`
-  return origin ? `${origin}${p}` : p
-}
-
 function buildHomeJsonLd(origin: string | null, listArticles: Article[]): string {
   const root = origin ? `${origin}/` : '/'
   const orgId = origin ? `${origin}/#organization` : '/#organization'
@@ -189,39 +182,6 @@ function buildHomeJsonLd(origin: string | null, listArticles: Article[]): string
       description: HOME_DESCRIPTION,
       inLanguage: 'en',
       publisher: { '@id': orgId },
-    },
-    {
-      '@type': 'WebPage',
-      '@id': `${crawlAssetUrl(origin, '/llms.txt')}#webpage`,
-      url: crawlAssetUrl(origin, '/llms.txt'),
-      name: 'AgentStack.fyi machine-readable manifest (llms.txt)',
-      description:
-        'Plain-text overview of the site plus absolute URLs to static HTML article snapshots. Intended for language models, scripts, and clients that do not run JavaScript.',
-      isPartOf: { '@id': webId },
-    },
-    {
-      '@type': 'WebPage',
-      '@id': `${crawlAssetUrl(origin, '/crawl/index.html')}#webpage`,
-      url: crawlAssetUrl(origin, '/crawl/index.html'),
-      name: 'AgentStack.fyi static article index (no JavaScript)',
-      description: 'HTML page listing all approved articles as static snapshots without requiring JavaScript.',
-      isPartOf: { '@id': webId },
-    },
-    {
-      '@type': 'WebPage',
-      '@id': `${crawlAssetUrl(origin, '/crawl/urls.txt')}#webpage`,
-      url: crawlAssetUrl(origin, '/crawl/urls.txt'),
-      name: 'AgentStack.fyi crawl URL list (plain text)',
-      description: 'One URL per line for the manifest, static index, and about page.',
-      isPartOf: { '@id': webId },
-    },
-    {
-      '@type': 'WebPage',
-      '@id': `${crawlAssetUrl(origin, '/.well-known/llms.txt')}#webpage`,
-      url: crawlAssetUrl(origin, '/.well-known/llms.txt'),
-      name: 'AgentStack.fyi llms.txt (well-known alias)',
-      description: 'Alias of /llms.txt for clients that look under /.well-known/.',
-      isPartOf: { '@id': webId },
     },
   ]
 

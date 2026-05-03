@@ -3,7 +3,6 @@
 #
 # Discoverability for LLMs / fetchers (plain text + static HTML, no JS):
 #   LLM manifest: https://agentstack.fyi/llms.txt
-#   LLM manifest (well-known alias): https://agentstack.fyi/.well-known/llms.txt
 #   LLM manifest (www): https://www.agentstack.fyi/llms.txt
 #   Static article index: https://agentstack.fyi/crawl/index.html
 #   Static about: https://agentstack.fyi/crawl/about.html
