@@ -6,17 +6,17 @@ import { defineConfig, loadEnv } from 'vite'
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
 /**
- * Vite dev does not apply vercel.json rewrites, so /sitemap.xml would fall through to the SPA.
- * Uses ssrLoadModule so the same api/sitemap.ts runs under Vite (mirrors production behavior).
+ * Vite dev does not apply vercel.json rewrites for /sitemap.xml or /llms.txt.
+ * Uses ssrLoadModule so the same Edge handlers run locally (mirrors production).
  */
-function localSitemapPlugin(mode: string) {
+function localEdgeTextRoutesPlugin(mode: string) {
   return {
-    name: 'local-sitemap-xml',
+    name: 'local-edge-text-routes',
     enforce: 'pre' as const,
     configureServer(server: import('vite').ViteDevServer) {
       server.middlewares.use(async (req, res, next) => {
         const pathname = req.url?.split('?')[0]
-        if (pathname !== '/sitemap.xml') {
+        if (pathname !== '/sitemap.xml' && pathname !== '/llms.txt') {
           next()
           return
         }
@@ -30,13 +30,15 @@ function localSitemapPlugin(mode: string) {
           if (v) process.env[key] = v
         }
 
+        const modulePath = pathname === '/sitemap.xml' ? '/api/sitemap.ts' : '/api/llms.ts'
+
         try {
-          const mod = (await server.ssrLoadModule('/api/sitemap.ts')) as {
+          const mod = (await server.ssrLoadModule(modulePath)) as {
             default: (r: Request) => Promise<Response>
           }
           const host = req.headers.host ?? 'localhost:8080'
           const proto = host.startsWith('localhost') ? 'http' : 'https'
-          const request = new Request(`${proto}://${host}/sitemap.xml`)
+          const request = new Request(`${proto}://${host}${pathname}`)
           const response = await mod.default(request)
           res.statusCode = response.status
           response.headers.forEach((value, key) => {
@@ -44,7 +46,7 @@ function localSitemapPlugin(mode: string) {
           })
           res.end(await response.text())
         } catch (err) {
-          console.error('[vite dev sitemap]', err)
+          console.error(`[vite dev ${pathname}]`, err)
           next()
         } finally {
           for (const key of keys) {
@@ -60,7 +62,7 @@ function localSitemapPlugin(mode: string) {
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [localSitemapPlugin(mode), react()],
+  plugins: [localEdgeTextRoutesPlugin(mode), react()],
   server: {
     port: 8080,
   },

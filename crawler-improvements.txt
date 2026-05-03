@@ -11,3 +11,4 @@ Log of changes (newest last):
 - vite.config: dev-only /sitemap.xml via ssrLoadModule(api/sitemap.ts) + loadEnv so local matches prod.
 - HomePage dev: auto mock feed when Supabase empty; VITE_DEV_STRICT_EMPTY_FEED=1 for empty-state checklist only.
 - Bot/crawler HTML for /article/*: middleware.ts (UA sniff) + api/bot-article-html.ts (Edge, marked) — real HTML for bots only; SPA unchanged for browsers.
+- Dynamic /llms.txt: api/llms.ts + api/llmsBody.ts (approved articles from DB); removed public/llms.txt; vercel + vite dev plugin; admin success copy mentions llms.txt.

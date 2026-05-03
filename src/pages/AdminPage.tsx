@@ -298,7 +298,11 @@ export function AdminPage() {
         })
         setArticles((current) => current.map((entry) => (entry.id === editingId ? updated : entry)))
         setDraft(articleToDraft(updated))
-        setFormMessage('Article updated.')
+        setFormMessage(
+          updated.isApproved
+            ? 'Article updated. It appears on the homepage and in /llms.txt for agents.'
+            : 'Article updated.',
+        )
         return
       }
 
@@ -319,7 +323,9 @@ export function AdminPage() {
       })
       setArticles((current) => [inserted, ...current])
       setDraft(defaultDraft)
-      setFormMessage('Content added to moderation queue.')
+      setFormMessage(
+        'Content added to the moderation queue. After you approve it, it appears on the homepage and in /llms.txt.',
+      )
     } catch (err: unknown) {
       const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: string }).code) : ''
       if (code === '23505') {
@@ -673,6 +679,11 @@ export function AdminPage() {
                             })
                             setArticles((current) =>
                               current.map((entry) => (entry.id === article.id ? updated : entry)),
+                            )
+                            setFormMessage(
+                              nextApproved
+                                ? 'Approved — on the homepage and in /llms.txt for agents.'
+                                : 'Pending — removed from the public feed and llms.txt listing.',
                             )
                           } catch (e) {
                             setFormMessage(e instanceof Error ? e.message : 'Could not update approval')
