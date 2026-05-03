@@ -12,7 +12,7 @@ const HOME_DESCRIPTION =
   'Track MCP, APIs, and agent infrastructure updates without the noise. High-signal coverage for builders — AgentStack.fyi.'
 
 /** When set, prerender uses this origin for absolute URLs; when unset, uses root-relative paths so both apex and www work. */
-function explicitPublicOrigin(env: Record<string, string>): string | null {
+export function explicitPublicOrigin(env: Record<string, string>): string | null {
   const raw = env.VITE_PUBLIC_SITE_URL?.trim()
   if (!raw || !/^https?:\/\//i.test(raw)) return null
   return raw.replace(/\/$/, '')
@@ -83,7 +83,7 @@ function compareArticlesFeedOrder(a: Article, b: Article): number {
   return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
 }
 
-async function fetchApprovedArticlesForPrerender(
+export async function fetchApprovedArticlesForPrerender(
   supabaseUrl: string,
   supabaseAnonKey: string,
 ): Promise<Article[]> {

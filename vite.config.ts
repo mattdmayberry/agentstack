@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 import { buildHomePrerenderBundle } from './vite/homePrerender'
+import { writeStaticArticleSnapshots } from './vite/staticArticlePages'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 
@@ -82,9 +83,30 @@ function homePrerenderPlugin(mode: string, command: string) {
   }
 }
 
+function staticArticleSnapshotsPlugin(mode: string, command: string) {
+  let outDir = path.join(rootDir, 'dist')
+  return {
+    name: 'static-article-snapshots',
+    apply: 'build' as const,
+    configResolved(config: import('vite').ResolvedConfig) {
+      outDir = config.build.outDir
+    },
+    async closeBundle() {
+      if (command !== 'build') return
+      const env = loadEnv(mode, rootDir, '')
+      await writeStaticArticleSnapshots(outDir, env)
+    },
+  }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode, command }) => ({
-  plugins: [localEdgeTextRoutesPlugin(mode), react(), homePrerenderPlugin(mode, command)],
+  plugins: [
+    localEdgeTextRoutesPlugin(mode),
+    react(),
+    homePrerenderPlugin(mode, command),
+    staticArticleSnapshotsPlugin(mode, command),
+  ],
   server: {
     port: 8080,
   },

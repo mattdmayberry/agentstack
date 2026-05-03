@@ -33,7 +33,13 @@ AgentStack.fyi is a curated publication for builders tracking how software is sh
 
 ## Technical note for crawlers and agents
 
-The homepage is a client-rendered React app. This file is generated from the database and lists every **approved** article below (it updates when you publish or approve content — no separate file to edit). Use \`/sitemap.xml\` for URL-only discovery. Article pages return crawler-oriented HTML to common bot user-agents while humans still get the interactive app.
+The homepage is a client-rendered React app. This file is generated from the database and lists every **approved** article below (it updates when you publish or approve content — no separate file to edit). Use \`/sitemap.xml\` for URL-only discovery.
+
+For **plain HTML without JavaScript** (recommended for automated fetchers and LLMs), each article has a **static snapshot** rebuilt on every deploy:
+
+- \`/crawl/article/{slug}.html\` — full article body, metadata, and JSON-LD; same \`link rel="canonical"\` as the interactive URL \`/article/{slug}\`.
+
+The interactive route \`/article/{slug}\` may also return bot-oriented HTML for known crawler user-agents via edge middleware, but the \`/crawl/article/\` files do not depend on user-agent.
 
 `
 
@@ -59,10 +65,12 @@ export function buildLlmsText(origin: string, articles: LlmsArticleInput[]): str
     const slug = a.slug.trim()
     const title = a.title.trim() || slug
     const url = `${base}/article/${encodeURIComponent(slug)}`
+    const staticHtml = `${base}/crawl/article/${encodeURIComponent(slug)}.html`
     const sum = oneLine(a.summary ?? '')
     const cat = (a.category ?? '').trim()
     lines.push(`### ${title}`)
     lines.push(`- URL: ${url}`)
+    lines.push(`- Static HTML (no JS): ${staticHtml}`)
     if (cat) lines.push(`- Category: ${cat}`)
     lines.push(`- Summary: ${sum || '(No summary.)'}`)
     lines.push('')

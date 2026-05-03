@@ -2,20 +2,13 @@
  * Vercel Edge: full HTML document for an approved article (for crawlers that do not run JS).
  * Invoked from middleware for bot user-agents; humans still get the SPA.
  */
+import { buildArticleHtmlDocument, escapeHtml } from '../src/lib/articleSnapshotHtml.js'
 import { articleOgImageUrl } from '../src/lib/ogImage.js'
 import { marked } from 'marked'
 
 export const config = { runtime: 'edge' }
 
 marked.setOptions({ gfm: true })
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
 
 function notFoundPage(canonicalFallback: string): string {
   const t = 'Article not found — AgentStack.fyi'
@@ -117,106 +110,20 @@ export default async function handler(request: Request): Promise<Response> {
     thumbnailUrl: row.thumbnail_url,
   })
 
-  const orgId = `${origin}/#organization`
-  const articleId = `${canonical}#article`
-
-  const graph = [
-    {
-      '@type': 'Organization',
-      '@id': orgId,
-      name: 'AgentStack.fyi',
-      url: `${origin}/`,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${origin}/agent_stack_favicon_iso_19fad7_square.png`,
-      },
-    },
-    {
-      '@type': 'NewsArticle',
-      '@id': articleId,
-      headline: title,
-      description: desc,
-      datePublished: published,
-      dateModified: modifiedRaw,
-      url: canonical,
-      mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
-      image: [ogImage],
-      articleSection: row.category ?? undefined,
-      author: {
-        '@type': 'Organization',
-        name: row.source_name ?? 'AgentStack.fyi',
-        ...(row.source_url ? { url: row.source_url } : {}),
-      },
-      publisher: { '@id': orgId },
-    },
-    {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          name: 'Home',
-          item: `${origin}/`,
-        },
-        {
-          '@type': 'ListItem',
-          position: 2,
-          name: title,
-          item: canonical,
-        },
-      ],
-    },
-  ]
-
-  const safeJsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c')
-
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>${escapeHtml(`${title} — AgentStack.fyi`)}</title>
-<meta name="description" content="${escapeHtml(desc)}"/>
-<meta name="robots" content="index,follow"/>
-<link rel="canonical" href="${escapeHtml(canonical)}"/>
-<meta property="og:type" content="article"/>
-<meta property="og:site_name" content="AgentStack.fyi"/>
-<meta property="og:title" content="${escapeHtml(title)}"/>
-<meta property="og:description" content="${escapeHtml(desc.slice(0, 200))}"/>
-<meta property="og:url" content="${escapeHtml(canonical)}"/>
-<meta property="og:image" content="${escapeHtml(ogImage)}"/>
-<meta property="og:locale" content="en_US"/>
-${published ? `<meta property="article:published_time" content="${escapeHtml(published)}"/>` : ''}
-${modifiedRaw ? `<meta property="article:modified_time" content="${escapeHtml(modifiedRaw)}"/>` : ''}
-${row.category ? `<meta property="article:section" content="${escapeHtml(row.category)}"/>` : ''}
-<meta name="twitter:card" content="summary_large_image"/>
-<meta name="twitter:title" content="${escapeHtml(title)}"/>
-<meta name="twitter:description" content="${escapeHtml(desc.slice(0, 200))}"/>
-<meta name="twitter:image" content="${escapeHtml(ogImage)}"/>
-<style>
-  body{font-family:system-ui,-apple-system,sans-serif;line-height:1.6;max-width:42rem;margin:2rem auto;padding:0 1rem;color:#18181b;background:#fafafa;}
-  a{color:#0891b2;}
-  h1{font-size:1.75rem;line-height:1.2;margin:0 0 0.5rem;}
-  .meta{color:#52525b;font-size:0.9rem;margin-bottom:1.5rem;}
-  .cat{text-transform:uppercase;letter-spacing:0.08em;font-size:0.7rem;color:#0e7490;margin:0 0 0.25rem;}
-  .content{font-size:1.05rem;}
-  .content pre{overflow:auto;background:#f4f4f5;padding:0.75rem;border-radius:0.375rem;}
-  .content code{font-size:0.9em;}
-  .banner{font-size:0.8rem;color:#713f12;background:#fef3c7;border:1px solid #fcd34d;padding:0.5rem 0.75rem;border-radius:0.375rem;margin-bottom:1rem;}
-</style>
-<script type="application/ld+json">${safeJsonLd}</script>
-</head>
-<body>
-<p class="banner">You are viewing a crawler-friendly HTML snapshot. Humans: <a href="${escapeHtml(canonical)}">open the full interactive article</a>.</p>
-<article>
-<p class="cat">${escapeHtml(row.category ?? '')}</p>
-<h1>${escapeHtml(title)}</h1>
-<p class="meta">${escapeHtml(row.source_name ?? '')}${published ? ` · ${escapeHtml(new Date(published).toLocaleDateString('en-US', { dateStyle: 'medium' }))}` : ''}</p>
-<div class="content">${bodyHtml}</div>
-${row.source_url ? `<p><a href="${escapeHtml(row.source_url)}" rel="noopener noreferrer">View original source</a></p>` : ''}
-</article>
-</body>
-</html>`
+  const html = buildArticleHtmlDocument({
+    canonical,
+    origin,
+    title,
+    desc,
+    bodyHtml,
+    category: row.category ?? '',
+    sourceName: row.source_name ?? '',
+    sourceUrl: row.source_url ?? null,
+    published,
+    modifiedRaw,
+    ogImage,
+    bannerKind: 'edge',
+  })
 
   return new Response(html, {
     status: 200,
